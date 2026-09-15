@@ -1,0 +1,811 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CatalogStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProductBulletKind {
+  WHY_ESSENTIAL
+  PREFERRED_FOR
+}
+
+enum ComboListKind {
+  WHY_THIS_BOX
+  PREFERRED_FOR
+  SELECTION_REASON
+  PACKAGING
+}
+
+enum BannerPlacement {
+  HOME_HERO
+  SHOP_HERO
+  GUIDE_HERO
+  SOLUTION_GUIDE
+}
+
+enum CartStatus {
+  ACTIVE
+  ABANDONED
+  CONVERTED
+  EXPIRED
+}
+
+enum CartItemType {
+  PRODUCT
+  COMBO
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+}
+
+enum CustomerEventType {
+  PAGE_VIEW
+  PAGE_LEAVE
+  PRODUCT_VIEW
+  COMBO_VIEW
+  CART_ADD
+  CART_UPDATE
+  CART_REMOVE
+  CART_SAVED
+  WISHLIST_ADD
+  WISHLIST_REMOVE
+  WISHLIST_SAVED
+  CHECKOUT_STARTED
+  CHECKOUT_FIELD_COMPLETED
+  ORDER_CREATED
+  PROFILE_IDENTIFIED
+  PROFILE_RESTORED
+  CARE_PROFILE_UPDATED
+  PRICE_ALERT_CREATED
+  STOCK_ALERT_CREATED
+  CARE_TEAM_REQUESTED
+  DELIVERY_ESTIMATE_REQUESTED
+}
+
+enum LeadType {
+  CART_SAVE
+  WISHLIST_SAVE
+  PRICE_DROP
+  BACK_IN_STOCK
+  CARE_TEAM
+  DELIVERY_ESTIMATE
+}
+
+enum ConsentType {
+  WHATSAPP_MARKETING
+}
+
+enum ContentPageCategory {
+  SUPPORT
+  POLICY
+  COMPANY
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  role      Role     @default(ADMIN)
+  status    Status   @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AiChatLog {
+  id               String   @id @default(cuid())
+  visitorHash      String
+  topic            String
+  model            String
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens      Int      @default(0)
+  responseTimeMs   Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([topic, createdAt])
+  @@index([visitorHash, createdAt])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Journey {
+  id          String           @id @default(cuid())
+  slug        String           @unique
+  number      String?
+  name        String
+  description String?
+  icon        String?
+  color       String?
+  softColor   String?
+  products    ProductJourney[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Product {
+  id             String                @id @default(cuid())
+  slug           String                @unique
+  sku            String                @unique
+  name           String
+  description    String
+  badge          String?
+  price          Decimal               @db.Decimal(12, 2)
+  compareAtPrice Decimal?              @db.Decimal(12, 2)
+  stock          Int                   @default(0)
+  rating         Decimal?              @db.Decimal(2, 1)
+  reviewCount    Int                   @default(0)
+  status         CatalogStatus         @default(ACTIVE)
+  featured       Boolean               @default(false)
+  categoryId     String
+  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images         ProductImage[]
+  includedItems  ProductIncludedItem[]
+  bullets        ProductBullet[]
+  journeys       ProductJourney[]
+  attributes     ProductAttribute[]
+  variants       ProductVariant[]
+  comboItems     ComboProduct[]
+
+  cartItems     CartItem[]     @relation("CartProduct")
+  wishlistItems WishlistItem[] @relation("WishlistProduct")
+  orderItems    OrderItem[]    @relation("OrderProduct")
+  leads         CustomerLead[] @relation("LeadProduct")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([categoryId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  publicId  String?
+  alt       String?
+  sortOrder Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+model ProductIncludedItem {
+  id        String  @id @default(cuid())
+  name      String
+  image     String?
+  sortOrder Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+model ProductBullet {
+  id        String            @id @default(cuid())
+  kind      ProductBulletKind
+  text      String
+  sortOrder Int               @default(0)
+  productId String
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, kind, sortOrder])
+}
+
+model ProductJourney {
+  productId String
+  journeyId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@id([productId, journeyId])
+  @@index([journeyId])
+}
+
+model ProductAttribute {
+  id        String                  @id @default(cuid())
+  name      String
+  sortOrder Int                     @default(0)
+  productId String
+  product   Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values    ProductAttributeValue[]
+
+  @@index([productId, sortOrder])
+}
+
+model ProductAttributeValue {
+  id          String                @id @default(cuid())
+  value       String
+  colorHex    String?
+  sortOrder   Int                   @default(0)
+  attributeId String
+  attribute   ProductAttribute      @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  variants    ProductVariantValue[]
+
+  @@index([attributeId, sortOrder])
+}
+
+model ProductVariant {
+  id             String                @id @default(cuid())
+  sku            String                @unique
+  price          Decimal?              @db.Decimal(12, 2)
+  compareAtPrice Decimal?              @db.Decimal(12, 2)
+  stock          Int                   @default(0)
+  imageUrl       String?
+  isActive       Boolean               @default(true)
+  productId      String
+  product        Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values         ProductVariantValue[]
+
+  cartItems  CartItem[]  @relation("CartVariant")
+  orderItems OrderItem[] @relation("OrderVariant")
+
+  @@index([productId])
+}
+
+model ProductVariantValue {
+  variantId String
+  valueId   String
+  variant   ProductVariant        @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  value     ProductAttributeValue @relation(fields: [valueId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, valueId])
+  @@index([valueId])
+}
+
+model Combo {
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  sku            String           @unique
+  name           String
+  subtitle       String
+  description    String
+  journeyStage   String
+  price          Decimal          @db.Decimal(12, 2)
+  compareAtPrice Decimal          @db.Decimal(12, 2)
+  stock          Int              @default(0)
+  rating         Decimal?         @db.Decimal(2, 1)
+  reviewCount    Int              @default(0)
+  status         CatalogStatus    @default(ACTIVE)
+  images         ComboImage[]
+  items          ComboProduct[]
+  listItems      ComboListItem[]
+  usageGuide     ComboGuideStep[]
+  reviews        ComboReview[]
+  faqs           ComboFaq[]
+
+  cartItems     CartItem[]     @relation("CartCombo")
+  wishlistItems WishlistItem[] @relation("WishlistCombo")
+  orderItems    OrderItem[]    @relation("OrderCombo")
+  leads         CustomerLead[] @relation("LeadCombo")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model ComboImage {
+  id        String  @id @default(cuid())
+  url       String
+  publicId  String?
+  sortOrder Int     @default(0)
+  comboId   String
+  combo     Combo   @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@index([comboId, sortOrder])
+}
+
+model ComboProduct {
+  comboId   String
+  productId String
+  quantity  Int     @default(1)
+  variant   String?
+  sortOrder Int     @default(0)
+  combo     Combo   @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@id([comboId, productId])
+  @@index([productId])
+}
+
+model ComboListItem {
+  id        String        @id @default(cuid())
+  kind      ComboListKind
+  text      String
+  sortOrder Int           @default(0)
+  comboId   String
+  combo     Combo         @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@index([comboId, kind, sortOrder])
+}
+
+model ComboGuideStep {
+  id          String @id @default(cuid())
+  key         String
+  title       String
+  description String
+  sortOrder   Int    @default(0)
+  comboId     String
+  combo       Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@index([comboId, sortOrder])
+}
+
+model ComboReview {
+  id           String @id @default(cuid())
+  customerName String
+  rating       Int
+  review       String
+  sortOrder    Int    @default(0)
+  comboId      String
+  combo        Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@index([comboId, sortOrder])
+}
+
+model ComboFaq {
+  id        String @id @default(cuid())
+  question  String
+  answer    String
+  sortOrder Int    @default(0)
+  comboId   String
+  combo     Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@index([comboId, sortOrder])
+}
+
+model Banner {
+  id             String          @id @default(cuid())
+  key            String          @unique
+  placement      BannerPlacement
+  desktopImage   String
+  mobileImage    String?
+  publicId       String?
+  mobilePublicId String?
+  eyebrow        String?
+  title          String?
+  description    String?
+  buttonLabel    String?
+  link           String?
+  tone           String?
+  isPublished    Boolean         @default(true)
+  sortOrder      Int             @default(0)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([placement, isPublished, sortOrder])
+}
+
+model ContentPage {
+  id          String               @id @default(cuid())
+  slug        String               @unique
+  category    ContentPageCategory
+  title       String
+  eyebrow     String?
+  summary     String?
+  isPublished Boolean              @default(true)
+  sortOrder   Int                  @default(0)
+  sections    ContentPageSection[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([category, sortOrder])
+  @@index([isPublished])
+}
+
+model ContentPageSection {
+  id        String      @id @default(cuid())
+  title     String
+  body      String
+  sortOrder Int         @default(0)
+  pageId    String
+  page      ContentPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sortOrder])
+}
+
+model CommerceSetting {
+  id                         String  @id @default("default")
+  customComboMinSubtotal     Decimal @default(2000) @db.Decimal(12, 2)
+  customComboDiscountPercent Decimal @default(10) @db.Decimal(5, 2)
+  updatedAt                  DateTime @updatedAt
+}
+
+model CustomerProfile {
+  id               String   @id @default(cuid())
+  name             String?
+  normalizedName   String?
+  phone            String?
+  normalizedPhone  String?
+  email            String?
+  marketingConsent Boolean  @default(false)
+  journeySlug      String?
+  interests        Json?
+  budgetMin        Int?
+  budgetMax        Int?
+  firstSeenAt      DateTime @default(now())
+  lastSeenAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  accessTokens CustomerAccessToken[]
+  devices      DeviceIdentity[]
+  sessions     TrackingSession[]
+  events       CustomerEvent[]
+  carts        Cart[]
+  wishlist     Wishlist?
+  orders       Order[]
+  leads        CustomerLead[]
+  consents     ConsentLog[]
+
+  @@unique([normalizedName, normalizedPhone])
+  @@index([normalizedPhone])
+  @@index([lastSeenAt])
+}
+
+model CustomerAccessToken {
+  id         String          @id @default(cuid())
+  tokenHash  String          @unique
+  customerId String
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lastUsedAt DateTime        @default(now())
+  createdAt  DateTime        @default(now())
+
+  @@index([customerId])
+}
+
+model DeviceIdentity {
+  id          String           @id @default(cuid())
+  guestId     String           @unique
+  customerId  String?
+  customer    CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  firstSeenAt DateTime         @default(now())
+  lastSeenAt  DateTime         @default(now())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([customerId])
+}
+
+model TrackingSession {
+  id             String           @id @default(cuid())
+  sessionId      String           @unique
+  guestId        String
+  customerId     String?
+  customer       CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  referrer       String?
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  startedAt      DateTime         @default(now())
+  lastActivityAt DateTime         @default(now())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([guestId])
+  @@index([customerId])
+  @@index([lastActivityAt])
+}
+
+model CustomerEvent {
+  id         String            @id @default(cuid())
+  guestId    String
+  sessionId  String?
+  customerId String?
+  customer   CustomerProfile?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  type       CustomerEventType
+  path       String?
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime          @default(now())
+
+  @@index([guestId, createdAt])
+  @@index([customerId, createdAt])
+  @@index([type, createdAt])
+}
+
+model Cart {
+  id                String           @id @default(cuid())
+  guestId           String?
+  customerId        String?
+  customer          CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  status            CartStatus       @default(ACTIVE)
+  customerName      String?
+  phone             String?
+  email             String?
+  address           String?
+  area              String?
+  city              String?
+  note              String?
+  subtotalSnapshot  Decimal          @default(0) @db.Decimal(12, 2)
+  lastActivityAt    DateTime         @default(now())
+  abandonedAt       DateTime?
+  recoveredAt       DateTime?
+  convertedAt       DateTime?
+  expiresAt         DateTime?
+  recoveryTokenHash String?          @unique
+  recoveryExpiresAt DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  items CartItem[]
+  order Order?
+
+  @@index([guestId, status])
+  @@index([customerId, status])
+  @@index([status, lastActivityAt])
+}
+
+model CartItem {
+  id                String          @id @default(cuid())
+  cartId            String
+  cart              Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  clientKey         String
+  itemType          CartItemType
+  productId         String?
+  product           Product?        @relation("CartProduct", fields: [productId], references: [id], onDelete: SetNull)
+  variantId         String?
+  variant           ProductVariant? @relation("CartVariant", fields: [variantId], references: [id], onDelete: SetNull)
+  comboId           String?
+  combo             Combo?          @relation("CartCombo", fields: [comboId], references: [id], onDelete: SetNull)
+  quantity          Int             @default(1)
+  customConfig      Json?
+  unitPriceSnapshot Decimal         @db.Decimal(12, 2)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([cartId, clientKey])
+  @@index([productId])
+  @@index([comboId])
+}
+
+model Wishlist {
+  id         String           @id @default(cuid())
+  ownerKey   String           @unique
+  guestId    String?
+  customerId String?          @unique
+  customer   CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  items WishlistItem[]
+
+  @@index([guestId])
+}
+
+model WishlistItem {
+  id         String       @id @default(cuid())
+  wishlistId String
+  wishlist   Wishlist     @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  clientKey  String
+  itemType   CartItemType
+  productId  String?
+  product    Product?     @relation("WishlistProduct", fields: [productId], references: [id], onDelete: Cascade)
+  comboId    String?
+  combo      Combo?       @relation("WishlistCombo", fields: [comboId], references: [id], onDelete: Cascade)
+  createdAt  DateTime     @default(now())
+
+  @@unique([wishlistId, clientKey])
+  @@index([productId])
+  @@index([comboId])
+}
+
+model Order {
+  id                     String          @id @default(cuid())
+  orderNumber            String          @unique
+  customerId             String
+  customer               CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  cartId                 String?         @unique
+  cart                   Cart?           @relation(fields: [cartId], references: [id], onDelete: SetNull)
+  status                 OrderStatus     @default(PENDING)
+  paymentMethod          PaymentMethod   @default(CASH_ON_DELIVERY)
+  customerName           String
+  phone                  String
+  alternativePhone       String?
+  email                  String?
+  address                String
+  area                   String?
+  city                   String?
+  note                   String?
+  deliveryType           Int             @default(0)
+  steadfastConsignmentId String?         @unique
+  steadfastTrackingCode  String?         @unique
+  steadfastStatus        String?
+  steadfastSubmittedAt   DateTime?
+  steadfastLastSyncedAt  DateTime?
+  steadfastError         String?
+  subtotal               Decimal         @db.Decimal(12, 2)
+  deliveryCharge         Decimal         @db.Decimal(12, 2)
+  total                  Decimal         @db.Decimal(12, 2)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  items   OrderItem[]
+  history OrderStatusHistory[]
+
+  @@index([customerId, createdAt])
+  @@index([status, createdAt])
+  @@index([steadfastStatus, steadfastLastSyncedAt])
+}
+
+model OrderItem {
+  id            String          @id @default(cuid())
+  orderId       String
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemType      CartItemType
+  productId     String?
+  product       Product?        @relation("OrderProduct", fields: [productId], references: [id], onDelete: SetNull)
+  variantId     String?
+  variant       ProductVariant? @relation("OrderVariant", fields: [variantId], references: [id], onDelete: SetNull)
+  comboId       String?
+  combo         Combo?          @relation("OrderCombo", fields: [comboId], references: [id], onDelete: SetNull)
+  nameSnapshot  String
+  skuSnapshot   String?
+  imageSnapshot String?
+  quantity      Int
+  unitPrice     Decimal         @db.Decimal(12, 2)
+  lineTotal     Decimal         @db.Decimal(12, 2)
+  customConfig  Json?
+  createdAt     DateTime        @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([comboId])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model CustomerLead {
+  id         String           @id @default(cuid())
+  type       LeadType
+  guestId    String
+  customerId String?
+  customer   CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  productId  String?
+  product    Product?         @relation("LeadProduct", fields: [productId], references: [id], onDelete: SetNull)
+  comboId    String?
+  combo      Combo?           @relation("LeadCombo", fields: [comboId], references: [id], onDelete: SetNull)
+  data       Json?
+  isActive   Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([type, createdAt])
+  @@index([customerId])
+  @@index([guestId])
+}
+
+model ConsentLog {
+  id         String          @id @default(cuid())
+  customerId String
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       ConsentType
+  granted    Boolean
+  source     String?
+  createdAt  DateTime        @default(now())
+
+  @@index([customerId, type, createdAt])
+}
+
+model GuideCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  guides      Guide[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
+}
+
+model Guide {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  title         String
+  excerpt       String
+  coverImage    String
+  coverPublicId String?
+  coverAlt      String
+  authorName    String
+  readMinutes   Int            @default(3)
+  pdfUrl        String?
+  pageCount     Int?
+  status        CatalogStatus  @default(DRAFT)
+  featured      Boolean        @default(false)
+  popular       Boolean        @default(false)
+  sortOrder     Int            @default(0)
+  publishedAt   DateTime?
+  reviewedAt    DateTime?
+  categoryId    String
+  category      GuideCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  sections      GuideSection[]
+  sources       GuideSource[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([categoryId, status, sortOrder])
+  @@index([featured, popular, sortOrder])
+}
+
+model GuideSection {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  points    String[]
+  sortOrder Int      @default(0)
+  guideId   String
+  guide     Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId, sortOrder])
+}
+
+model GuideSource {
+  id        String @id @default(cuid())
+  label     String
+  url       String
+  sortOrder Int    @default(0)
+  guideId   String
+  guide     Guide  @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId, sortOrder])
+}
+
+model GuidePage {
+  id        String   @id @default("main")
+  content   Json
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,2022 @@
+{
+  "products": [
+    {
+      "id": "product-maternity-dress",
+      "slug": "premium-maternity-dress",
+      "name": "প্রিমিয়াম কটন ম্যাটারনিটি ড্রেস",
+      "description": "নরম ও আরামদায়ক প্রিমিয়াম কটনে তৈরি, গর্ভাবস্থা ও দৈনন্দিন ব্যবহারের জন্য উপযোগী পোশাক।",
+      "category": "ম্যাটারনিটি পোশাক",
+      "badge": "বেস্ট সেলার",
+      "images": [
+        "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 2450,
+      "compareAtPrice": 2900,
+      "stock": 14,
+      "rating": 4.8,
+      "reviewCount": 126,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "প্রিমিয়াম কটন ড্রেস"
+          },
+          {
+            "id": "included-2",
+            "name": "দুটি হিডেন ফিডিং জিপ"
+          },
+          {
+            "id": "included-3",
+            "name": "অ্যাডজাস্টেবল কোমর বেল্ট"
+          },
+          {
+            "id": "included-4",
+            "name": "ফ্যাব্রিক কেয়ার কার্ড"
+          }
+        ],
+        "whyEssential": [
+          "গর্ভাবস্থা ও প্রসবের পর শরীরের পরিবর্তনের সঙ্গে সহজে মানিয়ে যায়।",
+          "নরম ও বাতাস চলাচলযোগ্য কটন দীর্ঘ সময় আরাম দেয়।",
+          "গোপন জিপ নার্সিংকে আরও সহজ করে।"
+        ],
+        "preferredFor": [
+          "গর্ভবতী মা",
+          "নতুন মা",
+          "নার্সিং করান এমন মা",
+          "দৈনন্দিন ব্যবহার"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "maternity-wear"
+    },
+    {
+      "id": "product-feeding-maxi",
+      "slug": "feeding-friendly-maxi-dress",
+      "name": "ফিডিং ফ্রেন্ডলি ম্যাক্সি ড্রেস",
+      "description": "সহজ নার্সিংয়ের জন্য গোপন জিপসহ আধুনিক কাটের আরামদায়ক ম্যাক্সি ড্রেস।",
+      "category": "নার্সিং পোশাক",
+      "badge": "জনপ্রিয়",
+      "images": [
+        "https://images.unsplash.com/photo-1581338834647-b0fb40704e21?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 2250,
+      "compareAtPrice": 2650,
+      "stock": 11,
+      "rating": 4.7,
+      "reviewCount": 84,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "ফিডিং ফ্রেন্ডলি ম্যাক্সি"
+          },
+          {
+            "id": "included-2",
+            "name": "দুটি গোপন জিপ"
+          },
+          {
+            "id": "included-3",
+            "name": "অ্যাডজাস্টেবল ওয়েস্ট টাই"
+          },
+          {
+            "id": "included-4",
+            "name": "কেয়ার নির্দেশিকা"
+          }
+        ],
+        "whyEssential": [
+          "বাসা বা বাইরে শিশুকে সহজে ফিডিং করানো যায়।",
+          "হালকা কাপড় ও ঢিলেঢালা কাট চলাফেরায় আরাম দেয়।",
+          "মাতৃত্বের পরেও নিয়মিত পরা যায়।"
+        ],
+        "preferredFor": [
+          "নতুন মা",
+          "নার্সিং মা",
+          "হাসপাতাল ভিজিট",
+          "দৈনন্দিন ব্যবহার"
+        ]
+      },
+      "journeySlug": "breastfeeding",
+      "categorySlug": "nursing-wear"
+    },
+    {
+      "id": "product-diaper-bag",
+      "slug": "mother-baby-diaper-bag",
+      "name": "মাদার অ্যান্ড বেবি ডায়াপার ব্যাগ",
+      "description": "শিশুর প্রয়োজনীয় সব জিনিস গোছাতে একাধিক কম্পার্টমেন্টসহ প্রশস্ত ব্যাগ।",
+      "category": "মা ও শিশুর প্রয়োজনীয় পণ্য",
+      "badge": "বেস্ট সেলার",
+      "images": [
+        "https://images.unsplash.com/photo-1554342872-034a06541bad?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 1850,
+      "compareAtPrice": 2200,
+      "stock": 18,
+      "rating": 4.9,
+      "reviewCount": 203,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "মাল্টি-পকেট ডায়াপার ব্যাগ"
+          },
+          {
+            "id": "included-2",
+            "name": "ইনসুলেটেড বোতল হোল্ডার"
+          },
+          {
+            "id": "included-3",
+            "name": "পোর্টেবল চেঞ্জিং ম্যাট"
+          },
+          {
+            "id": "included-4",
+            "name": "ওয়াটারপ্রুফ ওয়েট পাউচ"
+          }
+        ],
+        "whyEssential": [
+          "শিশুর প্রয়োজনীয় জিনিস আলাদা করে রাখা যায়।",
+          "ইনসুলেটেড পকেট বোতলের তাপমাত্রা ধরে রাখতে সাহায্য করে।",
+          "হাত, কাঁধ বা স্ট্রলারে বহন করা যায়।"
+        ],
+        "preferredFor": [
+          "নবজাতকের মা-বাবা",
+          "ভ্রমণ",
+          "হাসপাতাল ভিজিট",
+          "দৈনন্দিন বাইরে যাওয়া"
+        ]
+      },
+      "journeySlug": "newborn",
+      "categorySlug": "mother-baby-essentials"
+    },
+    {
+      "id": "product-nursing-pillow",
+      "slug": "premium-nursing-pillow",
+      "name": "প্রিমিয়াম নার্সিং পিলো",
+      "description": "ফিডিংয়ের সময় মা ও শিশুর আরামদায়ক ভঙ্গির জন্য নরম ও সাপোর্টিভ পিলো।",
+      "category": "মা ও শিশুর আরাম",
+      "badge": "মায়েদের পছন্দ",
+      "images": [
+        "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1616627451515-cbc80e5ece35?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 1350,
+      "compareAtPrice": 1600,
+      "stock": 12,
+      "rating": 4.6,
+      "reviewCount": 51,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "সাপোর্টিভ নার্সিং পিলো"
+          },
+          {
+            "id": "included-2",
+            "name": "রিমুভেবল কটন কভার"
+          },
+          {
+            "id": "included-3",
+            "name": "প্রটেকটিভ ইনার লাইনার"
+          },
+          {
+            "id": "included-4",
+            "name": "স্টোরেজ ব্যাগ"
+          }
+        ],
+        "whyEssential": [
+          "ফিডিংয়ের সময় আরামদায়ক ভঙ্গি ধরে রাখতে সহায়তা করে।",
+          "হাত, কাঁধ ও পিঠের চাপ কমাতে সহায়তা করে।",
+          "খোলা যায় এমন কভার সহজে পরিষ্কার করা যায়।"
+        ],
+        "preferredFor": [
+          "নবজাতক",
+          "০–১২ মাসের শিশু",
+          "নতুন মা",
+          "ব্রেস্ট ও বোতল ফিডিং"
+        ]
+      },
+      "journeySlug": "breastfeeding",
+      "categorySlug": "mother-baby-comfort"
+    },
+    {
+      "id": "product-support-belt",
+      "slug": "maternity-support-belt",
+      "href": "/products/maternity-support-belt",
+      "name": "মানিকো ৩-ইন-১ অ্যাডজাস্টেবল প্রেগন্যান্সি সাপোর্ট বেল্ট",
+      "description": "গর্ভাবস্থায় পেটের নিচের অংশকে আরামদায়কভাবে ধরে রাখতে তৈরি ৩-ইন-১ অ্যাডজাস্টেবল সাপোর্ট বেল্ট। এর প্রশস্ত ব্রিদেবল ইলাস্টিক প্যানেল, নরম আন্ডার-বেলি ক্রেডল এবং আলাদা ওপরের সাপোর্ট স্ট্র্যাপ দৈনন্দিন হাঁটাচলা, দাঁড়িয়ে থাকা ও হালকা কাজের সময় প্রয়োজনমতো ফিট সমন্বয় করতে সাহায্য করে। কালো, স্কিন ও সাদা—তিনটি রঙ এবং M, L ও XL সাইজে পাওয়া যায়।",
+      "category": "প্রেগন্যান্সি কেয়ার",
+      "badge": "৩-ইন-১ সাপোর্ট",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/06.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/07.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/08.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/09.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/10.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/11.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/12.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/13.png"
+      ],
+      "price": 1150,
+      "compareAtPrice": 1350,
+      "stock": 16,
+      "rating": 4.7,
+      "reviewCount": 66,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "১টি ৩-ইন-১ প্রেগন্যান্সি সাপোর্ট বেল্ট"
+          },
+          {
+            "id": "included-2",
+            "name": "১টি আলাদা অ্যাডজাস্টেবল ওপরের সাপোর্ট স্ট্র্যাপ"
+          },
+          {
+            "id": "included-3",
+            "name": "ব্রিদেবল ইলাস্টিক সাইড প্যানেল ও হুক-অ্যান্ড-লুপ ক্লোজার"
+          },
+          {
+            "id": "included-4",
+            "name": "রঙ: কালো, স্কিন ও সাদা"
+          },
+          {
+            "id": "included-5",
+            "name": "সাইজ: M (৯০–১১০ সেমি), L (১০০–১২০ সেমি), XL (১১০–১৩২ সেমি)"
+          },
+          {
+            "id": "included-6",
+            "name": "সাইজ ও ব্যবহার নির্দেশিকা"
+          }
+        ],
+        "whyEssential": [
+          "নরম বাঁকানো আন্ডার-বেলি অংশটি পেটের নিচে আরামদায়ক সাপোর্ট তৈরি করে।",
+          "আলাদা ওপরের স্ট্র্যাপটি বেল্টের অবস্থান ও সাপোর্ট প্রয়োজনমতো সমন্বয় করতে সাহায্য করে।",
+          "প্রশস্ত ব্রিদেবল ইলাস্টিক প্যানেলে বাতাস চলাচল করে এবং শরীরের পরিবর্তনের সঙ্গে ফিট মানিয়ে নেওয়া যায়।",
+          "বড় হুক-অ্যান্ড-লুপ ফাস্টেনিং সহজে পরা, খোলা এবং টাইটনেস পরিবর্তন করতে সাহায্য করে।",
+          "সাইজ গাইড: M ৩৫.৫–৪৩.২৫ ইঞ্চি, L ৩৯.৫–৪৭.২৫ ইঞ্চি এবং XL ৪৩.২৫–৫২ ইঞ্চি।",
+          "দুই সাইজের মাঝামাঝি হলে আরামের জন্য বড় সাইজটি বেছে নিন; পোশাকের সাইজ নয়, পেটের মাপ অনুসরণ করুন।",
+          "হাত দিয়ে ঠান্ডা পানিতে মৃদু ডিটারজেন্টে ধুয়ে ছায়ায় শুকান; ব্লিচ, আয়রন ও টাম্বল ড্রাই এড়িয়ে চলুন।"
+        ],
+        "preferredFor": [
+          "দ্বিতীয় ও তৃতীয় ট্রাইমেস্টারে থাকা গর্ভবতী মা",
+          "হাঁটা, দাঁড়িয়ে থাকা বা হালকা দৈনন্দিন কাজের সময় অতিরিক্ত সাপোর্ট চান",
+          "অ্যাডজাস্টেবল আন্ডার-বেলি ও কোমর সাপোর্ট প্রয়োজন",
+          "M, L বা XL মাপের মধ্যে উপযুক্ত ফিট খুঁজছেন",
+          "গর্ভাবস্থাজনিত জটিলতা, তীব্র ব্যথা বা চিকিৎসাধীন অবস্থা থাকলে ব্যবহারের আগে চিকিৎসকের পরামর্শ নিন"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "pregnancy-care"
+    },
+    {
+      "id": "product-nursing-pads",
+      "slug": "reusable-nursing-pads",
+      "name": "রিইউজেবল নার্সিং প্যাড",
+      "description": "নরম, শোষণক্ষম ও ধুয়ে পুনরায় ব্যবহারযোগ্য নার্সিং প্যাড সেট।",
+      "category": "নার্সিং কেয়ার",
+      "images": [
+        "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 490,
+      "compareAtPrice": 590,
+      "stock": 30,
+      "rating": 4.6,
+      "reviewCount": 38,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "রিইউজেবল নার্সিং প্যাড সেট"
+          },
+          {
+            "id": "included-2",
+            "name": "ওয়াশ ব্যাগ"
+          },
+          {
+            "id": "included-3",
+            "name": "স্টোরেজ পাউচ"
+          }
+        ],
+        "whyEssential": [
+          "লিকেজ সামলাতে শোষণক্ষম লেয়ার সহায়তা করে।",
+          "ধুয়ে পুনরায় ব্যবহার করা যায়।",
+          "নরম পৃষ্ঠ দীর্ঘ সময় আরাম দেয়।"
+        ],
+        "preferredFor": [
+          "নতুন মা",
+          "নার্সিং মা",
+          "দৈনন্দিন ব্যবহার",
+          "রিইউজেবল কেয়ার"
+        ]
+      },
+      "journeySlug": "breastfeeding",
+      "categorySlug": "nursing-care"
+    },
+    {
+      "id": "product-hooded-towel",
+      "slug": "baby-hooded-cotton-towel",
+      "name": "বেবি হুডেড কটন টাওয়েল",
+      "description": "স্নানের পর শিশুকে আরামদায়কভাবে জড়িয়ে রাখতে নরম কটন টাওয়েল।",
+      "category": "বেবি বাথ",
+      "badge": "সফট কটন",
+      "images": [
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 790,
+      "compareAtPrice": 950,
+      "stock": 22,
+      "rating": 4.8,
+      "reviewCount": 92,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "হুডেড কটন টাওয়েল"
+          },
+          {
+            "id": "included-2",
+            "name": "কেয়ার কার্ড"
+          }
+        ],
+        "whyEssential": [
+          "হুড শিশুর মাথা ঢেকে উষ্ণ রাখতে সহায়তা করে।",
+          "নরম কটন ভেজা ত্বকে আরামদায়ক।",
+          "প্রতিদিনের গোসলের রুটিনে সহজে ব্যবহার করা যায়।"
+        ],
+        "preferredFor": ["নবজাতক", "০–২৪ মাস", "প্রতিদিনের গোসল", "উপহার"]
+      },
+      "journeySlug": "bath-hygiene",
+      "categorySlug": "baby-bath"
+    },
+    {
+      "id": "product-baby-wash",
+      "slug": "gentle-baby-hair-body-wash",
+      "name": "জেন্টল বেবি হেয়ার অ্যান্ড বডি ওয়াশ",
+      "description": "শিশুর প্রতিদিনের গোসলের জন্য মাইল্ড হেয়ার ও বডি ক্লিনজার।",
+      "category": "বেবি স্কিন কেয়ার",
+      "images": [
+        "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 750,
+      "compareAtPrice": 890,
+      "stock": 28,
+      "rating": 4.7,
+      "reviewCount": 73,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "হেয়ার অ্যান্ড বডি ওয়াশ"
+          },
+          {
+            "id": "included-2",
+            "name": "পাম্প বোতল"
+          }
+        ],
+        "whyEssential": [
+          "একটি পণ্যেই চুল ও শরীর পরিষ্কার করা যায়।",
+          "মাইল্ড ফর্মুলা দৈনন্দিন রুটিনের জন্য তৈরি।",
+          "পাম্প প্যাক ব্যবহার সহজ করে।"
+        ],
+        "preferredFor": [
+          "শিশুর দৈনন্দিন গোসল",
+          "মাথা ও শরীর",
+          "বাসায় ব্যবহার",
+          "ভ্রমণ"
+        ]
+      },
+      "journeySlug": "bath-hygiene",
+      "categorySlug": "baby-skin-care"
+    },
+    {
+      "id": "product-baby-moisturizer",
+      "slug": "daily-baby-moisturizer",
+      "name": "ডেইলি বেবি ময়েশ্চারাইজার",
+      "description": "গোসলের পর শিশুর ত্বকের আর্দ্রতা ধরে রাখতে হালকা ময়েশ্চারাইজার।",
+      "category": "বেবি স্কিন কেয়ার",
+      "images": [
+        "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 680,
+      "compareAtPrice": 790,
+      "stock": 25,
+      "rating": 4.8,
+      "reviewCount": 64,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "বেবি ময়েশ্চারাইজার"
+          },
+          {
+            "id": "included-2",
+            "name": "ফ্লিপ-টপ বোতল"
+          }
+        ],
+        "whyEssential": [
+          "গোসলের পর ত্বকের আর্দ্রতা ধরে রাখতে সহায়তা করে।",
+          "হালকা টেক্সচার সহজে ছড়িয়ে যায়।",
+          "দৈনন্দিন স্কিন-কেয়ার রুটিনকে সহজ করে।"
+        ],
+        "preferredFor": [
+          "গোসলের পর",
+          "দৈনন্দিন ব্যবহার",
+          "শুষ্ক আবহাওয়া",
+          "বেবি স্কিন কেয়ার"
+        ]
+      },
+      "journeySlug": "bath-hygiene",
+      "categorySlug": "baby-skin-care"
+    },
+    {
+      "id": "product-feeding-bowl",
+      "slug": "silicone-baby-feeding-bowl",
+      "name": "সিলিকন বেবি ফিডিং বোল",
+      "description": "শিশুর সলিড ফুড শুরু করার জন্য সাকশন বেসসহ ব্যবহারবান্ধব বোল।",
+      "category": "বেবি ফিডিং",
+      "images": [
+        "https://images.unsplash.com/photo-1542385151-efd9000785a0?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1591343395082-e120087004b4?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 820,
+      "compareAtPrice": 950,
+      "stock": 20,
+      "rating": 4.7,
+      "reviewCount": 44,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "সাকশন ফিডিং বোল"
+          },
+          {
+            "id": "included-2",
+            "name": "ঢাকনা"
+          },
+          {
+            "id": "included-3",
+            "name": "কেয়ার গাইড"
+          }
+        ],
+        "whyEssential": [
+          "সাকশন বেস টেবিলে বোল স্থির রাখতে সাহায্য করে।",
+          "গভীর বোল খাবার তোলা সহজ করে।",
+          "ধুয়ে পরিষ্কার করা সহজ।"
+        ],
+        "preferredFor": [
+          "সলিড ফুড শুরু",
+          "৬ মাসের বেশি শিশু",
+          "সেলফ ফিডিং",
+          "বাসা ও ভ্রমণ"
+        ]
+      },
+      "journeySlug": "feeding",
+      "categorySlug": "baby-feeding"
+    },
+    {
+      "id": "product-spoon-set",
+      "slug": "soft-tip-baby-spoon-set",
+      "name": "সফট টিপ বেবি স্পুন সেট",
+      "description": "শিশুর ছোট মুখের উপযোগী নরম টিপের দুইটি ফিডিং স্পুন।",
+      "category": "বেবি ফিডিং",
+      "images": [
+        "https://images.unsplash.com/photo-1602030028438-4cf153cbae9e?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1591343395082-e120087004b4?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 390,
+      "compareAtPrice": 450,
+      "stock": 35,
+      "rating": 4.6,
+      "reviewCount": 31,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "সফট-টিপ স্পুন ২টি"
+          },
+          {
+            "id": "included-2",
+            "name": "স্টোরেজ কেস"
+          }
+        ],
+        "whyEssential": [
+          "ছোট মুখের উপযোগী টিপ ফিডিং সহজ করে।",
+          "নরম টিপ শিশুর মাড়িতে আরামদায়ক।",
+          "স্টোরেজ কেস বাইরে বহনে সুবিধা দেয়।"
+        ],
+        "preferredFor": [
+          "৬ মাসের বেশি শিশু",
+          "পিউরি ও নরম খাবার",
+          "ভ্রমণ",
+          "দৈনন্দিন ফিডিং"
+        ]
+      },
+      "journeySlug": "feeding",
+      "categorySlug": "baby-feeding"
+    },
+    {
+      "id": "product-silicone-bib",
+      "slug": "adjustable-silicone-bib",
+      "name": "অ্যাডজাস্টেবল সিলিকন বিব",
+      "description": "ফিডিংয়ের সময় খাবার ধরে রাখতে প্রশস্ত পকেটসহ সহজে পরিষ্কারযোগ্য বিব।",
+      "category": "বেবি ফিডিং",
+      "images": [
+        "https://images.unsplash.com/photo-1560506840-ec148e82a604?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 590,
+      "compareAtPrice": 690,
+      "stock": 26,
+      "rating": 4.7,
+      "reviewCount": 47,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "অ্যাডজাস্টেবল সিলিকন বিব"
+          },
+          {
+            "id": "included-2",
+            "name": "ফুড-ক্যাচিং পকেট"
+          }
+        ],
+        "whyEssential": [
+          "প্রশস্ত পকেট পড়ে যাওয়া খাবার ধরে।",
+          "অ্যাডজাস্টেবল নেক ফিট শিশুর সঙ্গে মানিয়ে নেয়।",
+          "পানি দিয়ে দ্রুত পরিষ্কার করা যায়।"
+        ],
+        "preferredFor": ["সলিড ফুড", "সেলফ ফিডিং", "৬–৩৬ মাস", "সহজ পরিষ্কার"]
+      },
+      "journeySlug": "feeding",
+      "categorySlug": "baby-feeding"
+    },
+    {
+      "id": "product-thermometer",
+      "slug": "digital-baby-thermometer",
+      "name": "ডিজিটাল বেবি থার্মোমিটার",
+      "description": "ঘরে শিশুর তাপমাত্রা দ্রুত পর্যবেক্ষণের জন্য কমপ্যাক্ট ডিজিটাল থার্মোমিটার।",
+      "category": "বেবি হেলথ",
+      "badge": "হেলথ এসেনশিয়াল",
+      "images": [
+        "https://images.unsplash.com/photo-1580281658628-5262fbf84c1c?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 620,
+      "compareAtPrice": 720,
+      "stock": 24,
+      "rating": 4.7,
+      "reviewCount": 58,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "ডিজিটাল থার্মোমিটার"
+          },
+          {
+            "id": "included-2",
+            "name": "প্রটেকটিভ কেস"
+          },
+          {
+            "id": "included-3",
+            "name": "ব্যবহার নির্দেশিকা"
+          }
+        ],
+        "whyEssential": [
+          "ঘরে তাপমাত্রা পর্যবেক্ষণের একটি প্রয়োজনীয় টুল।",
+          "কমপ্যাক্ট ডিজাইন সংরক্ষণ সহজ করে।",
+          "ডিজিটাল ডিসপ্লে রিডিং পড়া সহজ করে।"
+        ],
+        "preferredFor": [
+          "নবজাতক ও শিশু",
+          "ফার্স্ট-এইড কিট",
+          "বাসা ও ভ্রমণ",
+          "অভিভাবক"
+        ]
+      },
+      "journeySlug": "health-safety",
+      "categorySlug": "baby-health"
+    },
+    {
+      "id": "product-nasal-aspirator",
+      "slug": "manual-baby-nasal-aspirator",
+      "name": "ম্যানুয়াল বেবি ন্যাসাল অ্যাসপিরেটর",
+      "description": "শিশুর নাক পরিষ্কারে অভিভাবকের নিয়ন্ত্রিত ব্যবহারের জন্য সফট-টিপ অ্যাসপিরেটর।",
+      "category": "বেবি হেলথ",
+      "images": [
+        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 680,
+      "compareAtPrice": 790,
+      "stock": 19,
+      "rating": 4.5,
+      "reviewCount": 29,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "ম্যানুয়াল ন্যাসাল অ্যাসপিরেটর"
+          },
+          {
+            "id": "included-2",
+            "name": "অতিরিক্ত সফট টিপ"
+          },
+          {
+            "id": "included-3",
+            "name": "স্টোরেজ কেস"
+          }
+        ],
+        "whyEssential": [
+          "অভিভাবক নিয়ন্ত্রিত suction ব্যবহার সহজ করে।",
+          "সফট টিপ নাকের কাছে আরামদায়কভাবে বসে।",
+          "খুলে ধুয়ে পরিষ্কার করা যায়।"
+        ],
+        "preferredFor": [
+          "নবজাতক ও শিশু",
+          "ঘরের বেবি কেয়ার কিট",
+          "ভ্রমণ",
+          "অভিভাবকের তত্ত্বাবধান"
+        ]
+      },
+      "journeySlug": "health-safety",
+      "categorySlug": "baby-health"
+    },
+    {
+      "id": "product-nail-care",
+      "slug": "baby-nail-care-set",
+      "name": "বেবি নেইল কেয়ার সেট",
+      "description": "শিশুর ছোট নখ পরিচর্যার জন্য প্রয়োজনীয় টুলসহ কমপ্যাক্ট কেয়ার সেট।",
+      "category": "বেবি গ্রুমিং",
+      "images": [
+        "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 540,
+      "compareAtPrice": 650,
+      "stock": 21,
+      "rating": 4.6,
+      "reviewCount": 36,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "বেবি নেইল ক্লিপার"
+          },
+          {
+            "id": "included-2",
+            "name": "সফট ফাইল"
+          },
+          {
+            "id": "included-3",
+            "name": "কাঁচি"
+          },
+          {
+            "id": "included-4",
+            "name": "স্টোরেজ কেস"
+          }
+        ],
+        "whyEssential": [
+          "শিশুর ছোট নখের জন্য প্রয়োজনীয় টুল একসাথে থাকে।",
+          "কমপ্যাক্ট কেস টুলগুলো গোছানো রাখে।",
+          "নিয়মিত গ্রুমিং রুটিন সহজ করে।"
+        ],
+        "preferredFor": ["নবজাতক", "শিশু", "বাসায় গ্রুমিং", "ভ্রমণ"]
+      },
+      "journeySlug": "bath-hygiene",
+      "categorySlug": "baby-grooming"
+    },
+    {
+      "id": "product-recovery-belt",
+      "slug": "postpartum-recovery-belt",
+      "name": "পোস্টপার্টাম রিকভারি বেল্ট",
+      "description": "প্রসব-পরবর্তী সময়ে দৈনন্দিন চলাফেরায় অ্যাডজাস্টেবল অ্যাবডোমিনাল সাপোর্ট।",
+      "category": "পোস্টপার্টাম কেয়ার",
+      "badge": "রিকভারি কেয়ার",
+      "images": [
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 1250,
+      "compareAtPrice": 1490,
+      "stock": 13,
+      "rating": 4.7,
+      "reviewCount": 49,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "অ্যাডজাস্টেবল রিকভারি বেল্ট"
+          },
+          {
+            "id": "included-2",
+            "name": "সাপোর্ট প্যানেল"
+          },
+          {
+            "id": "included-3",
+            "name": "ব্যবহার নির্দেশিকা"
+          }
+        ],
+        "whyEssential": [
+          "দৈনন্দিন চলাফেরায় অ্যাবডোমিনাল সাপোর্ট দেয়।",
+          "অ্যাডজাস্টেবল ফিট প্রয়োজনমতো সেট করা যায়।",
+          "পোশাকের নিচে ব্যবহার করা যায়।"
+        ],
+        "preferredFor": [
+          "প্রসব-পরবর্তী মা",
+          "রিকভারি সময়",
+          "দৈনন্দিন চলাফেরা",
+          "অ্যাডজাস্টেবল সাপোর্ট"
+        ]
+      },
+      "journeySlug": "postpartum",
+      "categorySlug": "postpartum-care"
+    },
+    {
+      "id": "product-maternity-pads",
+      "slug": "maternity-sanitary-pad-pack",
+      "name": "ম্যাটারনিটি স্যানিটারি প্যাড প্যাক",
+      "description": "হাসপাতাল ব্যাগ ও প্রসব-পরবর্তী সময়ের জন্য বেশি শোষণক্ষম ম্যাটারনিটি প্যাড প্যাক।",
+      "category": "ম্যাটারনিটি কেয়ার",
+      "images": [
+        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 650,
+      "compareAtPrice": 750,
+      "stock": 32,
+      "rating": 4.8,
+      "reviewCount": 77,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "হাই-অ্যাবজরবেন্স ম্যাটারনিটি প্যাড"
+          },
+          {
+            "id": "included-2",
+            "name": "হাইজিন পাউচ"
+          }
+        ],
+        "whyEssential": [
+          "হাসপাতাল ব্যাগে আগে থেকে প্রস্তুত রাখা যায়।",
+          "পোস্টপার্টাম সময়ের প্রয়োজন অনুযায়ী বেশি শোষণক্ষম।",
+          "আলাদা প্যাক সংরক্ষণ সহজ করে।"
+        ],
+        "preferredFor": [
+          "হাসপাতাল ব্যাগ",
+          "প্রসব-পরবর্তী সময়",
+          "নতুন মা",
+          "ম্যাটারনিটি কেয়ার"
+        ]
+      },
+      "journeySlug": "postpartum",
+      "categorySlug": "maternity-care"
+    },
+    {
+      "id": "product-swaddle",
+      "slug": "breathable-cotton-baby-swaddle",
+      "name": "ব্রিদেবল কটন বেবি সোয়াডল",
+      "description": "নবজাতককে আরামদায়কভাবে জড়িয়ে রাখতে হালকা ও ব্রিদেবল কটন সোয়াডল।",
+      "category": "নিউবর্ন এসেনশিয়াল",
+      "badge": "নিউবর্ন",
+      "images": [
+        "https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=900&q=85",
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=900&q=85"
+      ],
+      "price": 790,
+      "compareAtPrice": 920,
+      "stock": 27,
+      "rating": 4.8,
+      "reviewCount": 88,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "কটন সোয়াডল"
+          },
+          {
+            "id": "included-2",
+            "name": "ওয়াশ ও কেয়ার কার্ড"
+          }
+        ],
+        "whyEssential": [
+          "নবজাতককে আরামদায়কভাবে জড়িয়ে রাখতে সাহায্য করে।",
+          "ব্রিদেবল কটন দৈনন্দিন ব্যবহারের উপযোগী।",
+          "হালকা কাপড় সহজে ভাঁজ ও বহন করা যায়।"
+        ],
+        "preferredFor": [
+          "নবজাতক",
+          "হাসপাতাল থেকে বাসায় আসা",
+          "ঘুম ও বিশ্রাম",
+          "উপহার"
+        ]
+      },
+      "journeySlug": "newborn",
+      "categorySlug": "newborn-essential"
+    },
+    {
+      "id": "product-fetal-doppler",
+      "slug": "portable-baby-fetal-doppler",
+      "href": "/products/portable-baby-fetal-doppler",
+      "name": "পোর্টেবল বেবি ফিটাল ডপলার",
+      "description": "৩.০ MHz আলাদা প্রোব, ডিজিটাল LCD ডিসপ্লে, বিল্ট-ইন স্পিকার এবং সহজ কন্ট্রোলসহ ঘরে ব্যবহারের জন্য পোর্টেবল ফিটাল ডপলার। এটি চিকিৎসকের নিয়মিত prenatal checkup-এর বিকল্প নয়; ব্যবহার ও ফলাফল নিয়ে উদ্বেগ থাকলে চিকিৎসকের পরামর্শ নিন।",
+      "category": "প্রেগন্যান্সি মনিটরিং",
+      "badge": "ডিজিটাল ডিসপ্লে",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/06.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/07.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/08.png"
+      ],
+      "price": 2490,
+      "compareAtPrice": 2890,
+      "stock": 18,
+      "rating": 4.8,
+      "reviewCount": 47,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "১টি ডিজিটাল ফিটাল ডপলার ইউনিট"
+          },
+          {
+            "id": "included-2",
+            "name": "১টি আলাদা ৩.০ MHz প্রোব"
+          },
+          {
+            "id": "included-3",
+            "name": "বিল্ট-ইন স্পিকার ও LCD ডিসপ্লে"
+          },
+          {
+            "id": "included-4",
+            "name": "ব্যবহার নির্দেশিকা"
+          }
+        ],
+        "whyEssential": [
+          "পোর্টেবল ডিজাইন ঘরে বা ভ্রমণে সংরক্ষণ ও বহন সহজ করে।",
+          "ডিজিটাল ডিসপ্লেতে heart-rate reading এবং battery status দেখা যায়।",
+          "আলাদা প্রোব ও সহজ button control ব্যবহারকে সুবিধাজনক করে।",
+          "এটি নিয়মিত prenatal checkup বা চিকিৎসকের মূল্যায়নের বিকল্প নয়।"
+        ],
+        "preferredFor": [
+          "চিকিৎসকের পরামর্শ অনুযায়ী ব্যবহার করতে চান এমন গর্ভবতী মা",
+          "বাড়িতে supervised listening",
+          "সহজ digital display পছন্দ করেন",
+          "অস্বাভাবিক reading, নড়াচড়া কমে যাওয়া বা কোনো উদ্বেগে সরাসরি চিকিৎসা সহায়তা নিন"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "pregnancy-monitoring"
+    },
+    {
+      "id": "product-palmers-stretch-mark-cream",
+      "slug": "palmers-cocoa-butter-stretch-mark-cream-125g",
+      "href": "/products/palmers-cocoa-butter-stretch-mark-cream-125g",
+      "name": "Palmer’s Cocoa Butter Formula Stretch Mark Cream 125g",
+      "description": "Cocoa butter, shea butter, collagen, elastin ও argan oil সমৃদ্ধ ১২৫ গ্রাম massage cream। নিয়মিত ময়েশ্চারাইজিং ম্যাসাজে ত্বক নরম ও নমনীয় রাখতে তৈরি; এটি stretch mark সম্পূর্ণ দূর করার নিশ্চয়তা দেয় না।",
+      "category": "ম্যাটারনিটি স্কিন কেয়ার",
+      "badge": "১২৫ গ্রাম",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/06.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/07.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/08.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/09.png"
+      ],
+      "price": 1450,
+      "compareAtPrice": 1650,
+      "stock": 24,
+      "rating": 4.8,
+      "reviewCount": 83,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "Palmer’s Cocoa Butter Formula Massage Cream 125g"
+          },
+          {
+            "id": "included-2",
+            "name": "ফ্লিপ-টপ টিউব"
+          },
+          {
+            "id": "included-3",
+            "name": "Outer retail box"
+          }
+        ],
+        "whyEssential": [
+          "Cocoa butter ও shea butter ত্বক ময়েশ্চারাইজ রাখতে সহায়তা করে।",
+          "Collagen, elastin ও argan oil-সহ massage formula ত্বক নরম ও নমনীয় রাখতে তৈরি।",
+          "পেট, নিতম্ব, উরু ও বক্ষের বাইরের ত্বকে নিয়মিত massage routine-এ ব্যবহার করা যায়।",
+          "Patch test করুন এবং irritated বা broken skin-এ ব্যবহার করবেন না।"
+        ],
+        "preferredFor": [
+          "গর্ভাবস্থায় body moisturising routine",
+          "শুষ্ক বা টানটান অনুভূত ত্বক",
+          "প্রসব-পরবর্তী skin-care routine",
+          "External use only"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "maternity-skin-care"
+    },
+    {
+      "id": "product-time-marker-water-bottle",
+      "slug": "motivational-time-marker-water-bottle",
+      "href": "/products/motivational-time-marker-water-bottle",
+      "name": "টাইম-মার্কার মোটিভেশনাল ওয়াটার বোতল",
+      "description": "সকাল ৮টা থেকে সন্ধ্যা ৭টা পর্যন্ত সময় ও motivational reminder print করা স্বচ্ছ pink water bottle। লিক-রেজিস্ট্যান্ট locking lid, flip spout এবং carry strap দৈনন্দিন hydration routine সহজ করে।",
+      "category": "প্রেগন্যান্সি লাইফস্টাইল",
+      "badge": "হাইড্রেশন রিমাইন্ডার",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/06.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/07.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/08.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/09.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/10.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/11.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/12.png"
+      ],
+      "price": 890,
+      "compareAtPrice": 1090,
+      "stock": 26,
+      "rating": 4.7,
+      "reviewCount": 55,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "১টি time-marker water bottle"
+          },
+          {
+            "id": "included-2",
+            "name": "Locking flip lid ও drinking spout"
+          },
+          {
+            "id": "included-3",
+            "name": "Carry strap"
+          },
+          {
+            "id": "included-4",
+            "name": "Hydration reminder print"
+          }
+        ],
+        "whyEssential": [
+          "সকাল থেকে সন্ধ্যা পর্যন্ত printed time markers নিয়মিত পানি পান মনে করিয়ে দেয়।",
+          "One-touch flip lid এবং locking mechanism দৈনন্দিন ব্যবহার সহজ করে।",
+          "স্বচ্ছ body-তে অবশিষ্ট পানির পরিমাণ সহজে দেখা যায়।",
+          "Carry strap বাসা, অফিস বা ভ্রমণে বহন সহজ করে।"
+        ],
+        "preferredFor": [
+          "দৈনন্দিন hydration routine",
+          "গর্ভবতী ও নতুন মা",
+          "অফিস, বাসা ও ভ্রমণ",
+          "সময় দেখে পানি পান করার অভ্যাস"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "pregnancy-lifestyle"
+    },
+    {
+      "id": "product-soft-sleep-eye-mask",
+      "slug": "soft-satin-sleep-eye-mask",
+      "href": "/products/soft-satin-sleep-eye-mask",
+      "name": "সফট সাটিন স্লিপ আই মাস্ক",
+      "description": "নরম padded satin surface, contoured eye space এবং stretchable elastic bandসহ আরামদায়ক sleep mask। ঘুম, বিশ্রাম ও ভ্রমণের সময় আলো কমাতে সহায়তা করে।",
+      "category": "ম্যাটারনিটি কমফোর্ট",
+      "badge": "সফট সাটিন",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/06.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/07.png"
+      ],
+      "price": 490,
+      "compareAtPrice": 590,
+      "stock": 30,
+      "rating": 4.7,
+      "reviewCount": 41,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "১টি padded satin eye mask"
+          },
+          {
+            "id": "included-2",
+            "name": "Stretchable elastic headband"
+          },
+          {
+            "id": "included-3",
+            "name": "Protective storage pouch"
+          }
+        ],
+        "whyEssential": [
+          "নরম padded surface চোখের চারপাশে আরামদায়কভাবে বসে।",
+          "Contoured eye space চোখের ওপর সরাসরি চাপ কমাতে সাহায্য করে।",
+          "Elastic band বিভিন্ন head size-এর সঙ্গে সহজে মানিয়ে নেয়।",
+          "ঘুম, বিশ্রাম ও ভ্রমণের সময় আলো কমাতে সহায়তা করে।"
+        ],
+        "preferredFor": [
+          "দিনে বিশ্রাম বা power nap",
+          "গর্ভাবস্থায় relaxation routine",
+          "ভ্রমণ",
+          "আলো-সংবেদনশীল ঘুমের পরিবেশ"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "maternity-comfort"
+    },
+    {
+      "id": "product-pregnancy-document-organizer",
+      "slug": "maaniko-pregnancy-document-organizer",
+      "href": "/products/maaniko-pregnancy-document-organizer",
+      "name": "মানিকো প্রেগন্যান্সি ডকুমেন্ট অর্গানাইজার",
+      "description": "প্রেসক্রিপশন, ultrasound image, test report, appointment slip ও অন্যান্য maternity records আলাদা pocket-এ গুছিয়ে রাখার expandable document organizer। Snap closure এবং portable folder design hospital visit-এ প্রয়োজনীয় কাগজ সহজে বহন করতে সাহায্য করে।",
+      "category": "প্রেগন্যান্সি অর্গানাইজেশন",
+      "badge": "মেডিকেল রেকর্ড ফোল্ডার",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/06.png"
+      ],
+      "price": 690,
+      "compareAtPrice": 850,
+      "stock": 22,
+      "rating": 4.8,
+      "reviewCount": 36,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "১টি expandable pregnancy document organizer"
+          },
+          {
+            "id": "included-2",
+            "name": "Prescriptions-এর জন্য labelled pocket"
+          },
+          {
+            "id": "included-3",
+            "name": "Test reports ও ultrasound records-এর pocket"
+          },
+          {
+            "id": "included-4",
+            "name": "Appointment slip ও miscellaneous papers-এর pocket"
+          },
+          {
+            "id": "included-5",
+            "name": "Snap closure"
+          }
+        ],
+        "whyEssential": [
+          "গর্ভাবস্থার গুরুত্বপূর্ণ medical papers category অনুযায়ী আলাদা রাখা যায়।",
+          "Expandable pockets একাধিক report, prescription ও scan image গুছিয়ে রাখতে সাহায্য করে।",
+          "Snap closure কাগজ বেরিয়ে যাওয়া কমায়।",
+          "Hospital visit-এ প্রয়োজনীয় documents এক folder-এ বহন করা যায়।"
+        ],
+        "preferredFor": [
+          "Prenatal appointment records",
+          "Ultrasound ও test report সংরক্ষণ",
+          "Hospital file preparation",
+          "নতুন মা-বাবার organised record keeping"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "pregnancy-organization"
+    },
+    {
+      "id": "product-compression-socks",
+      "slug": "maternity-open-toe-compression-socks",
+      "href": "/products/maternity-open-toe-compression-socks",
+      "name": "ম্যাটারনিটি ওপেন-টো কম্প্রেশন সকস",
+      "description": "হাঁটু পর্যন্ত ওপেন-টো graduated compression socks, যা দীর্ঘ সময় দাঁড়িয়ে থাকা, বসা বা ভ্রমণের সময় পায়ে supportive compression দেয়। সঠিক size ও compression level নিশ্চিত করে ব্যবহার করুন; circulation problem থাকলে আগে চিকিৎসকের পরামর্শ নিন।",
+      "category": "প্রেগন্যান্সি কমফোর্ট",
+      "badge": "গ্র্যাজুয়েটেড কম্প্রেশন",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/02.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/03.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/04.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/05.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/06.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/07.png"
+      ],
+      "price": 850,
+      "compareAtPrice": 990,
+      "stock": 20,
+      "rating": 4.7,
+      "reviewCount": 44,
+      "productType": "single",
+      "details": {
+        "includedItems": [
+          {
+            "id": "included-1",
+            "name": "১ জোড়া knee-high open-toe compression socks"
+          },
+          {
+            "id": "included-2",
+            "name": "Graduated compression knit"
+          },
+          {
+            "id": "included-3",
+            "name": "Size ও care guide"
+          }
+        ],
+        "whyEssential": [
+          "Graduated knit নিচের পা জুড়ে supportive compression দেয়।",
+          "Open-toe design fit ও toe movement পর্যবেক্ষণ সহজ করে।",
+          "হাঁটু পর্যন্ত length দীর্ঘ সময় বসা, দাঁড়ানো বা ভ্রমণের routine-এ ব্যবহারযোগ্য।",
+          "সঠিক size ও compression level নিশ্চিত না করে ব্যবহার করবেন না।"
+        ],
+        "preferredFor": [
+          "চিকিৎসকের পরামর্শ অনুযায়ী compression support চান",
+          "দীর্ঘ সময় দাঁড়িয়ে বা বসে থাকেন",
+          "ভ্রমণ",
+          "Circulation disorder, diabetes, skin injury বা তীব্র ব্যথা থাকলে আগে চিকিৎসকের পরামর্শ নিন"
+        ]
+      },
+      "journeySlug": "pregnancy",
+      "categorySlug": "pregnancy-comfort"
+    }
+  ],
+  "combos": [
+    {
+      "id": "solution-box-pregnancy",
+      "slug": "pregnancy-essential-box",
+      "name": "মানিকো কমপ্লিট প্রেগন্যান্সি কেয়ার বক্স",
+      "subtitle": "কমফোর্ট, hydration, skin care, monitoring ও organisation-এর ৭টি প্রয়োজনীয় পণ্য",
+      "description": "গর্ভাবস্থার দৈনন্দিন routine আরও organised ও comfortable করতে তৈরি ৭-পণ্যের curated combo। এতে রয়েছে মানিকো ৩-ইন-১ সাপোর্ট বেল্ট, ডিজিটাল ফিটাল ডপলার, Palmer’s 125g stretch mark cream, time-marker water bottle, soft sleep eye mask, pregnancy document organizer এবং এক জোড়া open-toe compression socks।",
+      "images": [
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/maternity-support-belt/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/baby-fetal-doppler/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/palmers-stretch-mark-cream/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/time-marker-water-bottle/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/soft-sleep-eye-mask/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/pregnancy-document-organizer/01.png",
+        "https://res.cloudinary.com/dohhfubsa/image/upload/maaniko/products/compression-socks/01.png"
+      ],
+      "items": [
+        {
+          "productId": "product-support-belt",
+          "quantity": 1,
+          "variant": "রঙ ও M/L/XL সাইজ অর্ডারের সময় নিশ্চিত হবে"
+        },
+        {
+          "productId": "product-fetal-doppler",
+          "quantity": 1
+        },
+        {
+          "productId": "product-palmers-stretch-mark-cream",
+          "quantity": 1
+        },
+        {
+          "productId": "product-time-marker-water-bottle",
+          "quantity": 1
+        },
+        {
+          "productId": "product-soft-sleep-eye-mask",
+          "quantity": 1
+        },
+        {
+          "productId": "product-pregnancy-document-organizer",
+          "quantity": 1
+        },
+        {
+          "productId": "product-compression-socks",
+          "quantity": 1,
+          "variant": "সাইজ ও compression level অর্ডারের সময় নিশ্চিত হবে"
+        }
+      ],
+      "price": 6490,
+      "compareAtPrice": 8010,
+      "stock": 12,
+      "rating": 4.9,
+      "reviewCount": 96,
+      "journeyStage": "প্রেগন্যান্সি • দৈনন্দিন কেয়ার • দ্বিতীয় ও তৃতীয় ট্রাইমেস্টার",
+      "whyThisBox": [
+        "Support belt, compression socks ও sleep mask দৈনন্দিন comfort routine-এর বিভিন্ন প্রয়োজন কভার করে।",
+        "Time-marker bottle hydration মনে করায় এবং document organizer গুরুত্বপূর্ণ maternity records গুছিয়ে রাখে।",
+        "Palmer’s massage cream skin moisturising routine-এ ব্যবহার করা যায়, আর fetal Doppler-এর জন্য responsible-use guidance দেওয়া আছে।",
+        "৭টি পণ্য আলাদাভাবে কিনলে মোট ৳৮,০১০; কম্বোতে ৳৬,৪৯০।"
+      ],
+      "preferredFor": [
+        "প্রথমবার মা হতে যাচ্ছেন",
+        "দ্বিতীয় বা তৃতীয় ট্রাইমেস্টারে আছেন",
+        "দৈনন্দিন pregnancy routine organised রাখতে চান",
+        "সম্পূর্ণ ও ব্যবহারযোগ্য pregnancy gift দিতে চান"
+      ],
+      "usageGuide": [
+        {
+          "id": "fit",
+          "title": "সঠিক size ও fit নিশ্চিত করুন",
+          "description": "Support belt-এর জন্য পেটের মাপ এবং compression socks-এর জন্য পা ও calf measurement নিন। অতিরিক্ত টাইট লাগলে ব্যবহার বন্ধ করুন।"
+        },
+        {
+          "id": "routine",
+          "title": "দৈনন্দিন routine সাজান",
+          "description": "Water bottle-এর time markers hydration reminder হিসেবে ব্যবহার করুন, skin-care product label অনুসরণ করুন এবং বিশ্রামের সময় eye mask ব্যবহার করুন।"
+        },
+        {
+          "id": "records",
+          "title": "Medical records গুছিয়ে রাখুন",
+          "description": "Prescription, test report, ultrasound image ও appointment slip organizer-এর আলাদা pocket-এ রাখুন এবং প্রতিটি visit-এর পর update করুন।"
+        },
+        {
+          "id": "medical-guidance",
+          "title": "Responsible monitoring",
+          "description": "Fetal Doppler নিয়মিত prenatal care-এর বিকল্প নয়। অস্বাভাবিক reading, baby movement কমে যাওয়া, ব্যথা বা উদ্বেগে device-এর ওপর নির্ভর না করে চিকিৎসকের সঙ্গে যোগাযোগ করুন।"
+        }
+      ],
+      "selectionReasons": [
+        "Comfort, hydration, skin care, record keeping ও responsible monitoring—পাঁচটি routine একসাথে বিবেচনা করা হয়েছে।",
+        "প্রতিটি included product-এর নিজস্ব working `/products/[slug]` details page রয়েছে।",
+        "৬২টি real product image Cloudinary gallery-তে ব্যবহার করা হয়েছে।"
+      ],
+      "packaging": [
+        "মানিকো ব্র্যান্ডেড protective box",
+        "প্রতিটি item-এর আলাদা protective wrapping",
+        "বাংলা size, care ও responsible-use cards",
+        "Personalized gift-note option"
+      ],
+      "reviews": [
+        {
+          "id": "review-sadia",
+          "customerName": "Sadia Rahman",
+          "rating": 5,
+          "review": "সবকিছু একসাথে সুন্দরভাবে প্যাক করা ছিল। কী কিনব সেই confusion অনেক কমেছে।"
+        },
+        {
+          "id": "review-nusrat",
+          "customerName": "Nusrat Jahan",
+          "rating": 5,
+          "review": "প্রতিটি product-এর quantity ও ব্যবহার পরিষ্কারভাবে দেওয়া ছিল, তাই gift হিসেবে পাঠাতেও confidence পেয়েছি।"
+        }
+      ],
+      "faqs": [
+        {
+          "id": "same-products",
+          "question": "ছবিতে দেখানো পণ্যগুলোই কি পাব?",
+          "answer": "হ্যাঁ, Box-এ উল্লেখ করা product ও quantity-ই দেওয়া হবে। কোনো item পরিবর্তনের প্রয়োজন হলে অর্ডার confirm করার আগে আপনার অনুমতি নেওয়া হবে।"
+        },
+        {
+          "id": "remove-item",
+          "question": "Combo থেকে কোনো পণ্য বাদ দেওয়া যাবে?",
+          "answer": "এই Box-টি একটি fixed curated solution, তাই item বাদ দিলে combo price প্রযোজ্য হবে না। প্রয়োজনীয় size বা color option থাকলে অর্ডারের সময় নির্বাচন করা যাবে।"
+        },
+        {
+          "id": "damaged-item",
+          "question": "কোনো পণ্য missing বা damaged হলে কী হবে?",
+          "answer": "Delivery-এর পর দ্রুত আমাদের support team-কে ছবি বা unboxing videoসহ জানালে সংশ্লিষ্ট item যাচাই করে replacement support দেওয়া হবে।"
+        },
+        {
+          "id": "gift-ready",
+          "question": "Box-টি gift হিসেবে পাঠানো যাবে?",
+          "answer": "হ্যাঁ। Box-টি gift-ready packaging-এ আসে এবং checkout note-এ ছোট personalized message লিখতে পারবেন।"
+        }
+      ],
+      "href": "/solution-box/pregnancy-essential-box"
+    },
+    {
+      "id": "solution-box-newborn",
+      "slug": "newborn-welcome-box",
+      "name": "নিউবর্ন ওয়েলকাম বক্স",
+      "subtitle": "নবজাতকের প্রথম দিনের যত্ন ও ঘরে আসার প্রস্তুতি",
+      "description": "নবজাতককে স্বাগত জানাতে daily comfort, grooming এবং basic health monitoring-এর প্রয়োজনীয় জিনিস নিয়ে সাজানো box।",
+      "images": [
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=1100&q=88"
+      ],
+      "items": [
+        {
+          "productId": "product-swaddle",
+          "quantity": 1
+        },
+        {
+          "productId": "product-diaper-bag",
+          "quantity": 1
+        },
+        {
+          "productId": "product-hooded-towel",
+          "quantity": 1
+        },
+        {
+          "productId": "product-thermometer",
+          "quantity": 1
+        },
+        {
+          "productId": "product-nail-care",
+          "quantity": 1
+        }
+      ],
+      "price": 3690,
+      "compareAtPrice": 4590,
+      "stock": 9,
+      "rating": 4.9,
+      "reviewCount": 91,
+      "journeyStage": "নিউবর্ন • জন্ম থেকে ৩ মাস",
+      "whyThisBox": [
+        "নবজাতকের ঘুম, গোসল ও grooming-এর basic needs কভার করে।",
+        "বাড়ি ও বাইরে প্রয়োজনীয় জিনিস organised রাখা যায়।",
+        "নতুন মা-বাবার shopping confusion কমায়।"
+      ],
+      "preferredFor": [
+        "নতুন মা-বাবা",
+        "নবজাতকের homecoming",
+        "Baby shower gift",
+        "জন্ম থেকে ৩ মাস"
+      ],
+      "usageGuide": [
+        {
+          "id": "homecoming",
+          "title": "Homecoming preparation",
+          "description": "Swaddle ও diaper bag আগে থেকে পরিষ্কার ও organised করে রাখুন।"
+        },
+        {
+          "id": "daily",
+          "title": "Daily care",
+          "description": "Bath-এর পর hooded towel এবং নিয়মিত grooming-এ nail set ব্যবহার করুন।"
+        },
+        {
+          "id": "health",
+          "title": "Basic monitoring",
+          "description": "Thermometer-এর নির্দেশিকা পড়ে health kit-এ নিরাপদে রাখুন।"
+        }
+      ],
+      "selectionReasons": [
+        "Newborn-এর প্রথম দিকের practical routine অনুযায়ী বাছাই।",
+        "সহজে পরিষ্কার ও organised রাখা যায় এমন products।",
+        "Comfort, grooming ও monitoring-এর balance রাখা হয়েছে।"
+      ],
+      "packaging": [
+        "Gift-ready Maaniko box",
+        "Newborn checklist",
+        "Pastel tissue ও protective wrapping",
+        "Personalized welcome card"
+      ],
+      "reviews": [
+        {
+          "id": "review-sadia",
+          "customerName": "Sadia Rahman",
+          "rating": 5,
+          "review": "সবকিছু একসাথে সুন্দরভাবে প্যাক করা ছিল। কী কিনব সেই confusion অনেক কমেছে।"
+        },
+        {
+          "id": "review-nusrat",
+          "customerName": "Nusrat Jahan",
+          "rating": 5,
+          "review": "প্রতিটি product-এর quantity ও ব্যবহার পরিষ্কারভাবে দেওয়া ছিল, তাই gift হিসেবে পাঠাতেও confidence পেয়েছি।"
+        }
+      ],
+      "faqs": [
+        {
+          "id": "same-products",
+          "question": "ছবিতে দেখানো পণ্যগুলোই কি পাব?",
+          "answer": "হ্যাঁ, Box-এ উল্লেখ করা product ও quantity-ই দেওয়া হবে। কোনো item পরিবর্তনের প্রয়োজন হলে অর্ডার confirm করার আগে আপনার অনুমতি নেওয়া হবে।"
+        },
+        {
+          "id": "remove-item",
+          "question": "Combo থেকে কোনো পণ্য বাদ দেওয়া যাবে?",
+          "answer": "এই Box-টি একটি fixed curated solution, তাই item বাদ দিলে combo price প্রযোজ্য হবে না। প্রয়োজনীয় size বা color option থাকলে অর্ডারের সময় নির্বাচন করা যাবে।"
+        },
+        {
+          "id": "damaged-item",
+          "question": "কোনো পণ্য missing বা damaged হলে কী হবে?",
+          "answer": "Delivery-এর পর দ্রুত আমাদের support team-কে ছবি বা unboxing videoসহ জানালে সংশ্লিষ্ট item যাচাই করে replacement support দেওয়া হবে।"
+        },
+        {
+          "id": "gift-ready",
+          "question": "Box-টি gift হিসেবে পাঠানো যাবে?",
+          "answer": "হ্যাঁ। Box-টি gift-ready packaging-এ আসে এবং checkout note-এ ছোট personalized message লিখতে পারবেন।"
+        }
+      ],
+      "href": "/solution-box/newborn-welcome-box"
+    },
+    {
+      "id": "solution-box-feeding",
+      "slug": "first-feeding-journey-kit",
+      "name": "ফার্স্ট ফিডিং জার্নি কিট",
+      "subtitle": "মা ও শিশুর feeding journey শুরু করার complete solution",
+      "description": "নার্সিং থেকে শিশুর first solid food—feeding journey-এর দুই ধাপের প্রয়োজন মাথায় রেখে সাজানো practical kit।",
+      "images": [
+        "https://images.unsplash.com/photo-1542385151-efd9000785a0?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1591343395082-e120087004b4?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1100&q=88"
+      ],
+      "items": [
+        {
+          "productId": "product-nursing-pillow",
+          "quantity": 1
+        },
+        {
+          "productId": "product-feeding-maxi",
+          "quantity": 1,
+          "variant": "Size অর্ডারের সময় নিশ্চিত হবে"
+        },
+        {
+          "productId": "product-nursing-pads",
+          "quantity": 1
+        },
+        {
+          "productId": "product-feeding-bowl",
+          "quantity": 1
+        },
+        {
+          "productId": "product-spoon-set",
+          "quantity": 1
+        },
+        {
+          "productId": "product-silicone-bib",
+          "quantity": 1
+        }
+      ],
+      "price": 4590,
+      "compareAtPrice": 5890,
+      "stock": 11,
+      "rating": 4.8,
+      "reviewCount": 63,
+      "journeyStage": "নার্সিং থেকে First Solid Food",
+      "whyThisBox": [
+        "মায়ের nursing comfort ও শিশুর feeding tools একসাথে পাওয়া যায়।",
+        "Stage বদলালেও kit-এর products কাজে লাগতে থাকে।",
+        "Compatible feeding essentials খোঁজার ঝামেলা কমায়।"
+      ],
+      "preferredFor": [
+        "নার্সিং মা",
+        "৬ মাসে solid food শুরু",
+        "প্রথমবারের মা-বাবা",
+        "Feeding essentials gift"
+      ],
+      "usageGuide": [
+        {
+          "id": "nursing",
+          "title": "Nursing stage",
+          "description": "Pillow, feeding dress ও nursing pad দিয়ে comfortable routine তৈরি করুন।"
+        },
+        {
+          "id": "solid",
+          "title": "Solid food শুরু",
+          "description": "শিশু developmentally ready হলে bowl ও soft-tip spoon ব্যবহার শুরু করুন।"
+        },
+        {
+          "id": "independent",
+          "title": "Self-feeding practice",
+          "description": "Suction bowl ও pocket bib দিয়ে supervised self-feeding সহজ করুন।"
+        }
+      ],
+      "selectionReasons": [
+        "Mother এবং baby—দুজনের feeding comfort বিবেচনা করা হয়েছে।",
+        "Food-contact items সহজে পরিষ্কার করা যায়।",
+        "একাধিক feeding stage-এ ব্যবহারযোগ্য products রাখা হয়েছে।"
+      ],
+      "packaging": [
+        "Sectioned protective packaging",
+        "Feeding journey mini guide",
+        "Care ও cleaning card",
+        "Gift-note option"
+      ],
+      "reviews": [
+        {
+          "id": "review-sadia",
+          "customerName": "Sadia Rahman",
+          "rating": 5,
+          "review": "সবকিছু একসাথে সুন্দরভাবে প্যাক করা ছিল। কী কিনব সেই confusion অনেক কমেছে।"
+        },
+        {
+          "id": "review-nusrat",
+          "customerName": "Nusrat Jahan",
+          "rating": 5,
+          "review": "প্রতিটি product-এর quantity ও ব্যবহার পরিষ্কারভাবে দেওয়া ছিল, তাই gift হিসেবে পাঠাতেও confidence পেয়েছি।"
+        }
+      ],
+      "faqs": [
+        {
+          "id": "same-products",
+          "question": "ছবিতে দেখানো পণ্যগুলোই কি পাব?",
+          "answer": "হ্যাঁ, Box-এ উল্লেখ করা product ও quantity-ই দেওয়া হবে। কোনো item পরিবর্তনের প্রয়োজন হলে অর্ডার confirm করার আগে আপনার অনুমতি নেওয়া হবে।"
+        },
+        {
+          "id": "remove-item",
+          "question": "Combo থেকে কোনো পণ্য বাদ দেওয়া যাবে?",
+          "answer": "এই Box-টি একটি fixed curated solution, তাই item বাদ দিলে combo price প্রযোজ্য হবে না। প্রয়োজনীয় size বা color option থাকলে অর্ডারের সময় নির্বাচন করা যাবে।"
+        },
+        {
+          "id": "damaged-item",
+          "question": "কোনো পণ্য missing বা damaged হলে কী হবে?",
+          "answer": "Delivery-এর পর দ্রুত আমাদের support team-কে ছবি বা unboxing videoসহ জানালে সংশ্লিষ্ট item যাচাই করে replacement support দেওয়া হবে।"
+        },
+        {
+          "id": "gift-ready",
+          "question": "Box-টি gift হিসেবে পাঠানো যাবে?",
+          "answer": "হ্যাঁ। Box-টি gift-ready packaging-এ আসে এবং checkout note-এ ছোট personalized message লিখতে পারবেন।"
+        }
+      ],
+      "href": "/solution-box/first-feeding-journey-kit"
+    },
+    {
+      "id": "solution-box-bathing",
+      "slug": "baby-bathing-solution",
+      "name": "বেবি বাথিং সল্যুশন",
+      "subtitle": "Before, during এবং after-bath care একসাথে",
+      "description": "শিশুর গোসল ও গোসলের পরের care routine সহজ ও organised করতে চারটি প্রয়োজনীয় product।",
+      "images": [
+        "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1100&q=88"
+      ],
+      "items": [
+        {
+          "productId": "product-hooded-towel",
+          "quantity": 1
+        },
+        {
+          "productId": "product-baby-wash",
+          "quantity": 1
+        },
+        {
+          "productId": "product-baby-moisturizer",
+          "quantity": 1
+        },
+        {
+          "productId": "product-nail-care",
+          "quantity": 1
+        }
+      ],
+      "price": 2190,
+      "compareAtPrice": 2760,
+      "stock": 16,
+      "rating": 4.8,
+      "reviewCount": 58,
+      "journeyStage": "নিউবর্ন থেকে Toddler Bath Care",
+      "whyThisBox": [
+        "Bath ও after-bath care-এর প্রয়োজনীয় items একসাথে থাকে।",
+        "Routine organised থাকায় নতুন মা-বাবার কাজ সহজ হয়।",
+        "আলাদা product খোঁজার সময় কমে।"
+      ],
+      "preferredFor": [
+        "নবজাতক ও শিশু",
+        "প্রথম bath-care setup",
+        "নতুন মা-বাবা",
+        "Useful baby gift"
+      ],
+      "usageGuide": [
+        {
+          "id": "before",
+          "title": "Before bath",
+          "description": "Towel, clean clothes ও care products হাতের কাছে রাখুন।"
+        },
+        {
+          "id": "during",
+          "title": "During bath",
+          "description": "Baby wash-এর label ও age guidance অনুসরণ করে ব্যবহার করুন।"
+        },
+        {
+          "id": "after",
+          "title": "After bath",
+          "description": "Hooded towel দিয়ে শুকিয়ে প্রয়োজন অনুযায়ী moisturizer ব্যবহার করুন।"
+        }
+      ],
+      "selectionReasons": [
+        "Simple everyday bath routine অনুযায়ী বাছাই।",
+        "ব্যবহার ও পরিষ্কার করা সহজ products।",
+        "Before, during ও after-bath needs-এর balance।"
+      ],
+      "packaging": [
+        "Leak-protected product packing",
+        "Bath routine mini guide",
+        "Maaniko branded box",
+        "Gift-ready presentation"
+      ],
+      "reviews": [
+        {
+          "id": "review-sadia",
+          "customerName": "Sadia Rahman",
+          "rating": 5,
+          "review": "সবকিছু একসাথে সুন্দরভাবে প্যাক করা ছিল। কী কিনব সেই confusion অনেক কমেছে।"
+        },
+        {
+          "id": "review-nusrat",
+          "customerName": "Nusrat Jahan",
+          "rating": 5,
+          "review": "প্রতিটি product-এর quantity ও ব্যবহার পরিষ্কারভাবে দেওয়া ছিল, তাই gift হিসেবে পাঠাতেও confidence পেয়েছি।"
+        }
+      ],
+      "faqs": [
+        {
+          "id": "same-products",
+          "question": "ছবিতে দেখানো পণ্যগুলোই কি পাব?",
+          "answer": "হ্যাঁ, Box-এ উল্লেখ করা product ও quantity-ই দেওয়া হবে। কোনো item পরিবর্তনের প্রয়োজন হলে অর্ডার confirm করার আগে আপনার অনুমতি নেওয়া হবে।"
+        },
+        {
+          "id": "remove-item",
+          "question": "Combo থেকে কোনো পণ্য বাদ দেওয়া যাবে?",
+          "answer": "এই Box-টি একটি fixed curated solution, তাই item বাদ দিলে combo price প্রযোজ্য হবে না। প্রয়োজনীয় size বা color option থাকলে অর্ডারের সময় নির্বাচন করা যাবে।"
+        },
+        {
+          "id": "damaged-item",
+          "question": "কোনো পণ্য missing বা damaged হলে কী হবে?",
+          "answer": "Delivery-এর পর দ্রুত আমাদের support team-কে ছবি বা unboxing videoসহ জানালে সংশ্লিষ্ট item যাচাই করে replacement support দেওয়া হবে।"
+        },
+        {
+          "id": "gift-ready",
+          "question": "Box-টি gift হিসেবে পাঠানো যাবে?",
+          "answer": "হ্যাঁ। Box-টি gift-ready packaging-এ আসে এবং checkout note-এ ছোট personalized message লিখতে পারবেন।"
+        }
+      ],
+      "href": "/solution-box/baby-bathing-solution"
+    },
+    {
+      "id": "solution-box-health",
+      "slug": "baby-health-safety-box",
+      "name": "বেবি হেলথ অ্যান্ড সেফটি বক্স",
+      "subtitle": "ঘরের basic baby-care kit-এর প্রয়োজনীয় উপকরণ",
+      "description": "Daily monitoring, nasal care, grooming এবং organised storage-এর জন্য বাছাই করা practical tools।",
+      "images": [
+        "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1580281658628-5262fbf84c1c?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=1100&q=88"
+      ],
+      "items": [
+        {
+          "productId": "product-thermometer",
+          "quantity": 1
+        },
+        {
+          "productId": "product-nasal-aspirator",
+          "quantity": 1
+        },
+        {
+          "productId": "product-nail-care",
+          "quantity": 1
+        },
+        {
+          "productId": "product-diaper-bag",
+          "quantity": 1
+        }
+      ],
+      "price": 2990,
+      "compareAtPrice": 3690,
+      "stock": 13,
+      "rating": 4.8,
+      "reviewCount": 47,
+      "journeyStage": "নিউবর্ন ও Baby Daily Care",
+      "whyThisBox": [
+        "Basic care tools এক জায়গায় organised রাখা যায়।",
+        "ঘর ও ভ্রমণ—দুই জায়গাতেই carry করা সহজ।",
+        "প্রয়োজনের সময় essential tool খুঁজে পাওয়া সহজ হয়।"
+      ],
+      "preferredFor": [
+        "নবজাতকের মা-বাবা",
+        "Home baby-care kit",
+        "ভ্রমণ",
+        "Practical gift"
+      ],
+      "usageGuide": [
+        {
+          "id": "organize",
+          "title": "Organize",
+          "description": "সব tools পরিষ্কার ও শুকনো অবস্থায় dedicated compartment-এ রাখুন।"
+        },
+        {
+          "id": "read",
+          "title": "Instructions পড়ুন",
+          "description": "প্রতিটি health tool ব্যবহারের আগে তার manufacturer guide অনুসরণ করুন।"
+        },
+        {
+          "id": "support",
+          "title": "প্রয়োজনে professional care",
+          "description": "এগুলো basic monitoring tools; শিশুর অসুস্থতায় চিকিৎসকের পরামর্শ নিন।"
+        }
+      ],
+      "selectionReasons": [
+        "শুধু practical basic-care tools রাখা হয়েছে।",
+        "পরিষ্কার ও সংরক্ষণ সহজ এমন products।",
+        "Medical claim নয়—responsible daily monitoring-এ focus।"
+      ],
+      "packaging": [
+        "Protective individual wrapping",
+        "Tool storage checklist",
+        "Usage reminder card",
+        "Maaniko branded box"
+      ],
+      "reviews": [
+        {
+          "id": "review-sadia",
+          "customerName": "Sadia Rahman",
+          "rating": 5,
+          "review": "সবকিছু একসাথে সুন্দরভাবে প্যাক করা ছিল। কী কিনব সেই confusion অনেক কমেছে।"
+        },
+        {
+          "id": "review-nusrat",
+          "customerName": "Nusrat Jahan",
+          "rating": 5,
+          "review": "প্রতিটি product-এর quantity ও ব্যবহার পরিষ্কারভাবে দেওয়া ছিল, তাই gift হিসেবে পাঠাতেও confidence পেয়েছি।"
+        }
+      ],
+      "faqs": [
+        {
+          "id": "same-products",
+          "question": "ছবিতে দেখানো পণ্যগুলোই কি পাব?",
+          "answer": "হ্যাঁ, Box-এ উল্লেখ করা product ও quantity-ই দেওয়া হবে। কোনো item পরিবর্তনের প্রয়োজন হলে অর্ডার confirm করার আগে আপনার অনুমতি নেওয়া হবে।"
+        },
+        {
+          "id": "remove-item",
+          "question": "Combo থেকে কোনো পণ্য বাদ দেওয়া যাবে?",
+          "answer": "এই Box-টি একটি fixed curated solution, তাই item বাদ দিলে combo price প্রযোজ্য হবে না। প্রয়োজনীয় size বা color option থাকলে অর্ডারের সময় নির্বাচন করা যাবে।"
+        },
+        {
+          "id": "damaged-item",
+          "question": "কোনো পণ্য missing বা damaged হলে কী হবে?",
+          "answer": "Delivery-এর পর দ্রুত আমাদের support team-কে ছবি বা unboxing videoসহ জানালে সংশ্লিষ্ট item যাচাই করে replacement support দেওয়া হবে।"
+        },
+        {
+          "id": "gift-ready",
+          "question": "Box-টি gift হিসেবে পাঠানো যাবে?",
+          "answer": "হ্যাঁ। Box-টি gift-ready packaging-এ আসে এবং checkout note-এ ছোট personalized message লিখতে পারবেন।"
+        }
+      ],
+      "href": "/solution-box/baby-health-safety-box"
+    },
+    {
+      "id": "solution-box-postpartum",
+      "slug": "postpartum-comfort-box",
+      "name": "পোস্টপার্টাম কমফোর্ট বক্স",
+      "subtitle": "নতুন মায়ের comfort, nursing ও recovery care",
+      "description": "Delivery-এর পর মায়ের আরাম, hygiene ও feeding routine সহজ করতে thoughtfully curated postpartum essentials।",
+      "images": [
+        "https://images.unsplash.com/photo-1616627451515-cbc80e5ece35?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1100&q=88",
+        "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1100&q=88"
+      ],
+      "items": [
+        {
+          "productId": "product-feeding-maxi",
+          "quantity": 1,
+          "variant": "Size অর্ডারের সময় নিশ্চিত হবে"
+        },
+        {
+          "productId": "product-nursing-pillow",
+          "quantity": 1
+        },
+        {
+          "productId": "product-nursing-pads",
+          "quantity": 1
+        },
+        {
+          "productId": "product-recovery-belt",
+          "quantity": 1,
+          "variant": "অ্যাডজাস্টেবল"
+        },
+        {
+          "productId": "product-maternity-pads",
+          "quantity": 1
+        }
+      ],
+      "price": 4690,
+      "compareAtPrice": 5990,
+      "stock": 10,
+      "rating": 4.9,
+      "reviewCount": 82,
+      "journeyStage": "Delivery-এর পর প্রথম ১২ সপ্তাহ",
+      "whyThisBox": [
+        "Comfort, feeding ও hygiene care একসাথে কভার করে।",
+        "নতুন মায়ের জন্য আলাদা shopping-এর চাপ কমায়।",
+        "নিজের জন্য বা thoughtful gift—দুইভাবেই উপযোগী।"
+      ],
+      "preferredFor": [
+        "নতুন মা",
+        "নার্সিং মা",
+        "Delivery-এর পর recovery",
+        "New-mother gift"
+      ],
+      "usageGuide": [
+        {
+          "id": "first-days",
+          "title": "প্রথম কয়েক দিন",
+          "description": "Maternity pad ও comfortable feeding dress আগে থেকেই হাতের কাছে রাখুন।"
+        },
+        {
+          "id": "feeding",
+          "title": "Feeding comfort",
+          "description": "Pillow ও nursing pads দিয়ে comfortable feeding setup তৈরি করুন।"
+        },
+        {
+          "id": "recovery",
+          "title": "Recovery support",
+          "description": "Recovery belt ব্যবহারের আগে নিজের care provider-এর guidance অনুসরণ করুন।"
+        }
+      ],
+      "selectionReasons": [
+        "Mother-first comfort ও dignity বিবেচনা করা হয়েছে।",
+        "Postpartum daily routine-এ বাস্তবে কাজে লাগে এমন items।",
+        "Care-provider guidance প্রয়োজন এমন item-এ responsible note রাখা হয়েছে।"
+      ],
+      "packaging": [
+        "Discreet protective packaging",
+        "Postpartum care checklist",
+        "Personalized support card",
+        "Gift-ready Maaniko box"
+      ],
+      "reviews": [
+        {
+          "id": "review-sadia",
+          "customerName": "Sadia Rahman",
+          "rating": 5,
+          "review": "সবকিছু একসাথে সুন্দরভাবে প্যাক করা ছিল। কী কিনব সেই confusion অনেক কমেছে।"
+        },
+        {
+          "id": "review-nusrat",
+          "customerName": "Nusrat Jahan",
+          "rating": 5,
+          "review": "প্রতিটি product-এর quantity ও ব্যবহার পরিষ্কারভাবে দেওয়া ছিল, তাই gift হিসেবে পাঠাতেও confidence পেয়েছি।"
+        }
+      ],
+      "faqs": [
+        {
+          "id": "same-products",
+          "question": "ছবিতে দেখানো পণ্যগুলোই কি পাব?",
+          "answer": "হ্যাঁ, Box-এ উল্লেখ করা product ও quantity-ই দেওয়া হবে। কোনো item পরিবর্তনের প্রয়োজন হলে অর্ডার confirm করার আগে আপনার অনুমতি নেওয়া হবে।"
+        },
+        {
+          "id": "remove-item",
+          "question": "Combo থেকে কোনো পণ্য বাদ দেওয়া যাবে?",
+          "answer": "এই Box-টি একটি fixed curated solution, তাই item বাদ দিলে combo price প্রযোজ্য হবে না। প্রয়োজনীয় size বা color option থাকলে অর্ডারের সময় নির্বাচন করা যাবে।"
+        },
+        {
+          "id": "damaged-item",
+          "question": "কোনো পণ্য missing বা damaged হলে কী হবে?",
+          "answer": "Delivery-এর পর দ্রুত আমাদের support team-কে ছবি বা unboxing videoসহ জানালে সংশ্লিষ্ট item যাচাই করে replacement support দেওয়া হবে।"
+        },
+        {
+          "id": "gift-ready",
+          "question": "Box-টি gift হিসেবে পাঠানো যাবে?",
+          "answer": "হ্যাঁ। Box-টি gift-ready packaging-এ আসে এবং checkout note-এ ছোট personalized message লিখতে পারবেন।"
+        }
+      ],
+      "href": "/solution-box/postpartum-comfort-box"
+    }
+  ],
+  "journeys": [
+    {
+      "id": "pregnancy",
+      "number": "01",
+      "name": "Pregnancy",
+      "description": "গর্ভাবস্থার যত্ন",
+      "icon": "heartPulse",
+      "color": "#ef4277",
+      "softColor": "#fff0f5"
+    },
+    {
+      "id": "breastfeeding",
+      "number": "02",
+      "name": "Breastfeeding",
+      "description": "মা ও শিশুর আরাম",
+      "icon": "heart",
+      "color": "#9b5de5",
+      "softColor": "#f6f0ff"
+    },
+    {
+      "id": "newborn",
+      "number": "03",
+      "name": "Newborn",
+      "description": "নবজাতকের প্রয়োজন",
+      "icon": "baby",
+      "color": "#03a7fd",
+      "softColor": "#edf8ff"
+    },
+    {
+      "id": "feeding",
+      "number": "04",
+      "name": "Feeding",
+      "description": "খাবারের সময়",
+      "icon": "utensils",
+      "color": "#18ad79",
+      "softColor": "#ecfbf5"
+    },
+    {
+      "id": "bath-hygiene",
+      "number": "05",
+      "name": "Bathing",
+      "description": "গোসল ও পরিচ্ছন্নতা",
+      "icon": "bath",
+      "color": "#f4a11a",
+      "softColor": "#fff8e9"
+    },
+    {
+      "id": "postpartum",
+      "number": "06",
+      "name": "Postpartum",
+      "description": "প্রসব-পরবর্তী যত্ন",
+      "icon": "activity",
+      "color": "#a56a43",
+      "softColor": "#fbf4ef"
+    },
+    {
+      "id": "health-safety",
+      "number": "07",
+      "name": "Safety",
+      "description": "স্বাস্থ্য ও নিরাপত্তা",
+      "icon": "shield",
+      "color": "#168ac5",
+      "softColor": "#eef8fd"
+    }
+  ],
+  "banners": [
+    {
+      "id": "maaniko-pregnancy-banner",
+      "imageUrl": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788279122/maaniko-pregnancy-banner-desktop.png",
+      "mobileImageUrl": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788279100/maaniko-pregnancy-banner-mobile-tablet.png",
+      "productLink": "/solution-box",
+      "isPublished": true,
+      "placement": "HOME_HERO",
+      "sortOrder": 0
+    },
+    {
+      "id": "maaniko-journey-banner",
+      "imageUrl": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788279119/maaniko-journey-banner-desktop.png",
+      "mobileImageUrl": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788279121/maaniko-journey-banner-mobile-tablet.png",
+      "productLink": "/shop-by-journey",
+      "isPublished": true,
+      "placement": "HOME_HERO",
+      "sortOrder": 1
+    },
+    {
+      "id": "pregnancy-shop",
+      "desktopImage": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788316636/maaniko/shop-banners/pregnancy-shop-desktop.png",
+      "mobileImage": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788316654/maaniko/shop-banners/pregnancy-shop-mobile.png",
+      "eyebrow": "মা ও শিশুর বিশ্বস্ত সঙ্গী",
+      "title": "মাতৃত্বের প্রয়োজনীয় সমাধান—এক জায়গায়",
+      "description": "Pregnancy থেকে Postpartum—প্রতিটি ধাপের যত্ন",
+      "buttonLabel": "সমাধানগুলো দেখুন",
+      "buttonHref": "#shop-journeys",
+      "tone": "pink",
+      "placement": "SHOP_HERO",
+      "sortOrder": 0
+    },
+    {
+      "id": "newborn-shop",
+      "desktopImage": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788316654/maaniko/shop-banners/newborn-shop-desktop.png",
+      "mobileImage": "https://res.cloudinary.com/dohhfubsa/image/upload/v1788316661/maaniko/shop-banners/newborn-shop-mobile.png",
+      "eyebrow": "নবজাতকের কোমল যত্ন",
+      "title": "ছোট্ট সোনামণির প্রতিটি মুহূর্ত হোক নিরাপদ",
+      "description": "নবজাতকের প্রয়োজনীয় পণ্য বেছে নিন সহজেই",
+      "buttonLabel": "নিউবর্ন পণ্য দেখুন",
+      "buttonHref": "/shop?journey=newborn",
+      "tone": "blue",
+      "placement": "SHOP_HERO",
+      "sortOrder": 1
+    }
+  ]
+}
