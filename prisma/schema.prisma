@@ -656,6 +656,8 @@ model Order {
   steadfastSubmittedAt   DateTime?
   steadfastLastSyncedAt  DateTime?
   steadfastError         String?
+  publicTrackingToken    String?         @unique
+  publicTrackingExpiresAt DateTime?
   subtotal               Decimal         @db.Decimal(12, 2)
   deliveryCharge         Decimal         @db.Decimal(12, 2)
   total                  Decimal         @db.Decimal(12, 2)
@@ -668,6 +670,7 @@ model Order {
   @@index([customerId, createdAt])
   @@index([status, createdAt])
   @@index([steadfastStatus, steadfastLastSyncedAt])
+  @@index([publicTrackingExpiresAt])
 }
 
 model OrderItem {

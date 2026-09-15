@@ -37,4 +37,14 @@ export class AiChatDto {
   @IsString()
   @MaxLength(300)
   pagePath?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  customerName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  customerPhone?: string;
 }

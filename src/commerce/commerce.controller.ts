@@ -289,6 +289,24 @@ export class CommerceController {
     );
   }
 
+  @Post('orders/:orderId/share-link')
+  createOrderShareLink(
+    @Param('orderId') orderId: string,
+    @Headers('x-maaniko-guest-id') guestId?: string,
+    @Headers('x-maaniko-session-id') sessionId?: string,
+    @Headers('x-maaniko-customer-token') customerToken?: string,
+  ) {
+    return this.commerce.createOrderShareLink(
+      this.identity(guestId, sessionId, customerToken),
+      orderId,
+    );
+  }
+
+  @Get('orders/track/:token')
+  publicOrderTracking(@Param('token') token: string) {
+    return this.commerce.publicOrderTracking(token);
+  }
+
   @Post('leads')
   createLead(
     @Body() body: LeadInput,

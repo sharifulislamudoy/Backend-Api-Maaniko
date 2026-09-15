@@ -43,6 +43,7 @@ const MAX_CART_QUANTITY = 99;
 const MAX_COMBO_ITEM_QUANTITY = 20;
 const DEFAULT_FREE_DELIVERY_MINIMUM = 2000;
 const DEFAULT_DELIVERY_CHARGE = 120;
+const PUBLIC_TRACKING_DAYS = 30;
 
 type CustomerSafe = {
   id: string;
@@ -2120,6 +2121,14 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       .toUpperCase()}`;
   }
 
+  private publicTrackingToken() {
+    return randomBytes(24).toString('base64url');
+  }
+
+  private publicTrackingExpiry() {
+    return new Date(Date.now() + PUBLIC_TRACKING_DAYS * 86_400_000);
+  }
+
   private async decrementStockForLine(
     tx: Prisma.TransactionClient,
     line: QuoteLine,
@@ -2296,6 +2305,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       const created = await tx.order.create({
         data: {
           orderNumber: this.orderNumber(),
+          publicTrackingToken: this.publicTrackingToken(),
+          publicTrackingExpiresAt: this.publicTrackingExpiry(),
           customerId: identified.customer.id,
           cartId: cartResult.cart?.id,
           status: OrderStatus.PENDING,
@@ -2414,6 +2425,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       steadfastStatus: order.steadfastStatus,
       steadfastSubmittedAt: order.steadfastSubmittedAt,
       steadfastLastSyncedAt: order.steadfastLastSyncedAt,
+      publicTrackingToken: order.publicTrackingToken,
+      publicTrackingExpiresAt: order.publicTrackingExpiresAt,
       subtotal: this.asNumber(order.subtotal),
       deliveryCharge: this.asNumber(order.deliveryCharge),
       total: this.asNumber(order.total),
@@ -2434,6 +2447,107 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         customConfig: item.customConfig,
       })),
       history: (order.history ?? []).map((history: any) => ({
+        id: history.id,
+        status: history.status,
+        note: history.note,
+        createdAt: history.createdAt,
+      })),
+    };
+  }
+
+  async createOrderShareLink(
+    identityInput: CommerceIdentity,
+    orderIdInput: string,
+  ) {
+    const identity = this.validateIdentity(identityInput);
+    const customer = await this.customerFromRawToken(identity.customerToken);
+
+    if (!customer) {
+      throw new UnauthorizedException('Customer access পাওয়া যায়নি');
+    }
+
+    const orderId = this.requiredText(orderIdInput, 'orderId', 180);
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, customerId: customer.id },
+      select: {
+        id: true,
+        publicTrackingToken: true,
+        publicTrackingExpiresAt: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('অর্ডার পাওয়া যায়নি');
+    }
+
+    const stillValid =
+      order.publicTrackingToken &&
+      order.publicTrackingExpiresAt &&
+      order.publicTrackingExpiresAt.getTime() > Date.now();
+
+    if (stillValid) {
+      return {
+        token: order.publicTrackingToken,
+        expiresAt: order.publicTrackingExpiresAt,
+      };
+    }
+
+    const updated = await this.prisma.order.update({
+      where: { id: order.id },
+      data: {
+        publicTrackingToken: this.publicTrackingToken(),
+        publicTrackingExpiresAt: this.publicTrackingExpiry(),
+      },
+      select: {
+        publicTrackingToken: true,
+        publicTrackingExpiresAt: true,
+      },
+    });
+
+    return {
+      token: updated.publicTrackingToken,
+      expiresAt: updated.publicTrackingExpiresAt,
+    };
+  }
+
+  async publicOrderTracking(tokenInput: string) {
+    const token = this.requiredText(tokenInput, 'tracking token', 120);
+    const order = await this.prisma.order.findUnique({
+      where: { publicTrackingToken: token },
+      include: {
+        items: true,
+        history: { orderBy: { createdAt: 'asc' } },
+      },
+    });
+
+    if (
+      !order ||
+      !order.publicTrackingExpiresAt ||
+      order.publicTrackingExpiresAt.getTime() <= Date.now()
+    ) {
+      throw new NotFoundException('Tracking linkটি পাওয়া যায়নি অথবা মেয়াদ শেষ');
+    }
+
+    return {
+      orderNumber: order.orderNumber,
+      status: order.status,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      expiresAt: order.publicTrackingExpiresAt,
+      steadfastStatus: order.steadfastStatus,
+      steadfastTrackingCode: order.steadfastTrackingCode,
+      subtotal: this.asNumber(order.subtotal),
+      deliveryCharge: this.asNumber(order.deliveryCharge),
+      total: this.asNumber(order.total),
+      items: order.items.map((item) => ({
+        id: item.id,
+        name: item.nameSnapshot,
+        image: item.imageSnapshot,
+        quantity: item.quantity,
+        unitPrice: this.asNumber(item.unitPrice),
+        lineTotal: this.asNumber(item.lineTotal),
+      })),
+      history: order.history.map((history) => ({
         id: history.id,
         status: history.status,
         note: history.note,
