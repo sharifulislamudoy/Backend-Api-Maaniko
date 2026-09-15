@@ -37,6 +37,15 @@ const STATUS_RANK: Record<OrderStatus, number> = {
   CANCELLED: 4,
 };
 
+const MANUAL_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  PENDING: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+  CONFIRMED: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
+  PROCESSING: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
+  SHIPPED: [OrderStatus.DELIVERED],
+  DELIVERED: [],
+  CANCELLED: [],
+};
+
 @Injectable()
 export class SteadfastService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SteadfastService.name);
@@ -302,6 +311,56 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
         });
       }
     }
+  }
+
+  async manualUpdateOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    note?: string,
+  ) {
+    const id = String(orderId ?? '').trim();
+    if (!id) throw new BadRequestException('orderId প্রয়োজন');
+    if (!Object.values(OrderStatus).includes(status)) {
+      throw new BadRequestException('সঠিক order status দিন');
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundException('অর্ডার পাওয়া যায়নি');
+
+    if (!MANUAL_TRANSITIONS[order.status].includes(status)) {
+      throw new BadRequestException(
+        `${order.status} থেকে ${status} status-এ manually যাওয়া যাবে না`,
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      if (status === OrderStatus.CANCELLED) {
+        await this.restoreStock(tx, order.items);
+      }
+
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId: order.id,
+          status,
+          note:
+            String(note ?? '')
+              .trim()
+              .slice(0, 300) || `Admin manually changed status to ${status}`,
+        },
+      });
+
+      return tx.order.update({
+        where: { id: order.id },
+        data: { status },
+        include: {
+          items: true,
+          history: { orderBy: { createdAt: 'asc' } },
+        },
+      });
+    });
   }
 
   async syncOrder(orderId: string) {

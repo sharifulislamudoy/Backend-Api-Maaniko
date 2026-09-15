@@ -43,6 +43,18 @@ export class AdminCommerceController {
     return this.commerce.adminUpdateOrderStatus(orderId, body);
   }
 
+  @Patch('orders/:orderId/manual-status')
+  manualUpdateOrderStatus(
+    @Param('orderId') orderId: string,
+    @Body() body: { status: OrderStatus; note?: string },
+  ) {
+    return this.steadfast.manualUpdateOrderStatus(
+      orderId,
+      body.status,
+      body.note,
+    );
+  }
+
   @Post('orders/:orderId/steadfast/dispatch')
   dispatchToSteadfast(@Param('orderId') orderId: string) {
     return this.steadfast.dispatchOrder(orderId);
