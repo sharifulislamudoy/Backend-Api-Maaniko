@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsOptional,
   IsString,
@@ -47,4 +48,30 @@ export class AiChatDto {
   @IsString()
   @MaxLength(30)
   customerPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  conversationId?: string;
+}
+
+export class AiFeedbackDto {
+  @IsBoolean()
+  helpful!: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  feedback?: string;
+}
+
+export class AiKnowledgeReviewDto {
+  @IsIn(['APPROVED', 'REJECTED'])
+  status!: 'APPROVED' | 'REJECTED';
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(4000)
+  answer?: string;
 }

@@ -111,6 +111,12 @@ enum ContentPageCategory {
   COMPANY
 }
 
+enum AiKnowledgeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String?
@@ -122,19 +128,52 @@ model User {
 }
 
 model AiChatLog {
-  id               String   @id @default(cuid())
-  visitorHash      String
-  topic            String
-  model            String
-  promptTokens     Int      @default(0)
-  completionTokens Int      @default(0)
-  totalTokens      Int      @default(0)
-  responseTimeMs   Int      @default(0)
-  createdAt        DateTime @default(now())
+  id                 String   @id @default(cuid())
+  conversationId     String   @default("")
+  visitorHash        String
+  topic              String
+  intent             String   @default("UNKNOWN")
+  question           String   @default("") @db.Text
+  normalizedQuestion String   @default("") @db.Text
+  answer             String   @default("") @db.Text
+  pagePath           String?
+  needsFollowUp      Boolean  @default(false)
+  resolved           Boolean  @default(false)
+  helpful            Boolean?
+  feedback           String?  @db.Text
+  quickReplies       Json?
+  recommendedItems   Json?
+  model              String
+  promptTokens       Int      @default(0)
+  completionTokens   Int      @default(0)
+  totalTokens        Int      @default(0)
+  responseTimeMs     Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
 
   @@index([createdAt])
   @@index([topic, createdAt])
+  @@index([conversationId, createdAt])
+  @@index([needsFollowUp, createdAt])
+  @@index([helpful, createdAt])
   @@index([visitorHash, createdAt])
+}
+
+model AiKnowledgeEntry {
+  id                 String            @id @default(cuid())
+  sourceLogId        String?           @unique
+  question           String            @db.Text
+  normalizedQuestion String            @unique @db.Text
+  answer             String            @db.Text
+  intent             String            @default("UNKNOWN")
+  keywords           String[]
+  status             AiKnowledgeStatus @default(PENDING)
+  usageCount         Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([status, updatedAt])
+  @@index([intent, status])
 }
 
 model Category {
@@ -446,9 +485,9 @@ model ContentPageSection {
 }
 
 model CommerceSetting {
-  id                         String  @id @default("default")
-  customComboMinSubtotal     Decimal @default(2000) @db.Decimal(12, 2)
-  customComboDiscountPercent Decimal @default(10) @db.Decimal(5, 2)
+  id                         String   @id @default("default")
+  customComboMinSubtotal     Decimal  @default(2000) @db.Decimal(12, 2)
+  customComboDiscountPercent Decimal  @default(10) @db.Decimal(5, 2)
   updatedAt                  DateTime @updatedAt
 }
 
@@ -633,36 +672,36 @@ model WishlistItem {
 }
 
 model Order {
-  id                     String          @id @default(cuid())
-  orderNumber            String          @unique
-  customerId             String
-  customer               CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  cartId                 String?         @unique
-  cart                   Cart?           @relation(fields: [cartId], references: [id], onDelete: SetNull)
-  status                 OrderStatus     @default(PENDING)
-  paymentMethod          PaymentMethod   @default(CASH_ON_DELIVERY)
-  customerName           String
-  phone                  String
-  alternativePhone       String?
-  email                  String?
-  address                String
-  area                   String?
-  city                   String?
-  note                   String?
-  deliveryType           Int             @default(0)
-  steadfastConsignmentId String?         @unique
-  steadfastTrackingCode  String?         @unique
-  steadfastStatus        String?
-  steadfastSubmittedAt   DateTime?
-  steadfastLastSyncedAt  DateTime?
-  steadfastError         String?
-  publicTrackingToken    String?         @unique
+  id                      String          @id @default(cuid())
+  orderNumber             String          @unique
+  customerId              String
+  customer                CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  cartId                  String?         @unique
+  cart                    Cart?           @relation(fields: [cartId], references: [id], onDelete: SetNull)
+  status                  OrderStatus     @default(PENDING)
+  paymentMethod           PaymentMethod   @default(CASH_ON_DELIVERY)
+  customerName            String
+  phone                   String
+  alternativePhone        String?
+  email                   String?
+  address                 String
+  area                    String?
+  city                    String?
+  note                    String?
+  deliveryType            Int             @default(0)
+  steadfastConsignmentId  String?         @unique
+  steadfastTrackingCode   String?         @unique
+  steadfastStatus         String?
+  steadfastSubmittedAt    DateTime?
+  steadfastLastSyncedAt   DateTime?
+  steadfastError          String?
+  publicTrackingToken     String?         @unique
   publicTrackingExpiresAt DateTime?
-  subtotal               Decimal         @db.Decimal(12, 2)
-  deliveryCharge         Decimal         @db.Decimal(12, 2)
-  total                  Decimal         @db.Decimal(12, 2)
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
+  subtotal                Decimal         @db.Decimal(12, 2)
+  deliveryCharge          Decimal         @db.Decimal(12, 2)
+  total                   Decimal         @db.Decimal(12, 2)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 
   items   OrderItem[]
   history OrderStatusHistory[]
