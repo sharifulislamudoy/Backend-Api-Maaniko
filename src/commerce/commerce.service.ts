@@ -79,6 +79,16 @@ type CartViewItem = {
     stock: number;
     productType: 'single' | 'combo';
     sku: string;
+    selectedVariant?: {
+      id: string;
+      sku: string;
+      price: number | null;
+      compareAtPrice: number | null;
+      stock: number;
+      imageUrl: string | null;
+      isActive: boolean;
+      selections: Array<{ attribute: string; value: string }>;
+    };
     comboItems?: Array<{
       productId: string;
       slug: string;
@@ -818,6 +828,11 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       where: { id: productId, status: 'ACTIVE' },
       include: {
         images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        variants: {
+          where: { isActive: true },
+          select: { id: true },
+          take: 1,
+        },
       },
     });
     if (!product) throw new NotFoundException('পণ্যটি পাওয়া যায়নি');
@@ -825,6 +840,12 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     let price = this.asNumber(product.price);
     let stock = product.stock;
     let sku = product.sku;
+    let name = product.name;
+    let image = product.images[0]?.url;
+
+    if (product.variants.length > 0 && !variantId) {
+      throw new BadRequestException('রং/সাইজ নির্বাচন করুন');
+    }
 
     if (variantId) {
       const variant = await this.prisma.productVariant.findFirst({
@@ -833,11 +854,21 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           productId,
           isActive: true,
         },
+        include: {
+          values: {
+            include: { value: { include: { attribute: true } } },
+          },
+        },
       });
       if (!variant) throw new BadRequestException('ভ্যারিয়েন্টটি পাওয়া যায়নি');
       price = variant.price ? this.asNumber(variant.price) : price;
       stock = variant.stock;
       sku = variant.sku;
+      image = variant.imageUrl ?? image;
+      const optionLabel = variant.values
+        .map((item) => `${item.value.attribute.name}: ${item.value.value}`)
+        .join(', ');
+      if (optionLabel) name = `${product.name} — ${optionLabel}`;
     }
 
     if (stock < quantity) {
@@ -850,9 +881,9 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       productId,
       variantId,
       quantity,
-      name: product.name,
+      name,
       sku,
-      image: product.images[0]?.url,
+      image,
       unitPrice: this.money(price),
       lineTotal: this.money(price * quantity),
     };
@@ -1308,7 +1339,13 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
                 images: { orderBy: { sortOrder: 'asc' } },
               },
             },
-            variant: true,
+            variant: {
+              include: {
+                values: {
+                  include: { value: { include: { attribute: true } } },
+                },
+              },
+            },
             combo: {
               include: {
                 images: { orderBy: { sortOrder: 'asc' } },
@@ -1352,14 +1389,42 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
             name: item.product.name,
             description: item.product.description,
             category: item.product.category.name,
-            images: item.product.images.map((image) => image.url),
+            images: item.variant?.imageUrl
+              ? [
+                  item.variant.imageUrl,
+                  ...item.product.images
+                    .map((image) => image.url)
+                    .filter((image) => image !== item.variant?.imageUrl),
+                ]
+              : item.product.images.map((image) => image.url),
             price: this.money(currentPrice),
-            compareAtPrice: item.product.compareAtPrice
-              ? this.asNumber(item.product.compareAtPrice)
-              : undefined,
+            compareAtPrice: item.variant?.compareAtPrice
+              ? this.asNumber(item.variant.compareAtPrice)
+              : item.product.compareAtPrice
+                ? this.asNumber(item.product.compareAtPrice)
+                : undefined,
             stock,
             productType: 'single',
             sku: item.variant?.sku ?? item.product.sku,
+            selectedVariant: item.variant
+              ? {
+                  id: item.variant.id,
+                  sku: item.variant.sku,
+                  price: item.variant.price
+                    ? this.asNumber(item.variant.price)
+                    : null,
+                  compareAtPrice: item.variant.compareAtPrice
+                    ? this.asNumber(item.variant.compareAtPrice)
+                    : null,
+                  stock: item.variant.stock,
+                  imageUrl: item.variant.imageUrl,
+                  isActive: item.variant.isActive,
+                  selections: item.variant.values.map((entry) => ({
+                    attribute: entry.value.attribute.name,
+                    value: entry.value.value,
+                  })),
+                }
+              : undefined,
           },
         });
       }
