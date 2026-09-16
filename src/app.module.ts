@@ -17,6 +17,7 @@ import { GuidesModule } from './guides/guides.module';
 import { ContentPagesModule } from './content-pages/content-pages.module';
 import { StoreSettingsModule } from './store-settings/store-settings.module';
 import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
     ContentPagesModule,
     StoreSettingsModule,
     AiAssistantModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
