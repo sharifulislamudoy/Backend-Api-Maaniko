@@ -11,6 +11,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { CartItemType, OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { FinanceService } from '../finance/finance.service';
 
 type CreateOrderResponse = {
   status: number;
@@ -34,6 +36,7 @@ const STATUS_RANK: Record<OrderStatus, number> = {
   PROCESSING: 2,
   SHIPPED: 3,
   DELIVERED: 4,
+  RETURNED: 5,
   CANCELLED: 4,
 };
 
@@ -42,7 +45,8 @@ const MANUAL_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   CONFIRMED: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
   PROCESSING: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
   SHIPPED: [OrderStatus.DELIVERED],
-  DELIVERED: [],
+  DELIVERED: [OrderStatus.RETURNED],
+  RETURNED: [],
   CANCELLED: [],
 };
 
@@ -55,6 +59,8 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly inventory: InventoryService,
+    private readonly finance: FinanceService,
   ) {}
 
   onModuleInit() {
@@ -338,7 +344,14 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
 
     return this.prisma.$transaction(async (tx) => {
       if (status === OrderStatus.CANCELLED) {
-        await this.restoreStock(tx, order.items);
+        await this.inventory.releaseOrder(tx, order);
+      }
+      if (status === OrderStatus.DELIVERED) {
+        await this.inventory.deliverOrder(tx, order);
+      }
+      if (status === OrderStatus.RETURNED) {
+        await this.inventory.returnOrder(tx, order);
+        await this.finance.reverseReturnedOrder(tx, order.id);
       }
 
       await tx.orderStatusHistory.create({
@@ -352,14 +365,30 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
         },
       });
 
-      return tx.order.update({
+      const saved = await tx.order.update({
         where: { id: order.id },
-        data: { status },
+        data: {
+          status,
+          ...(status === OrderStatus.DELIVERED
+            ? { deliveredAt: new Date() }
+            : {}),
+          ...(status === OrderStatus.RETURNED
+            ? { returnedAt: new Date() }
+            : {}),
+        },
         include: {
           items: true,
           history: { orderBy: { createdAt: 'asc' } },
         },
       });
+      if (status === OrderStatus.DELIVERED) {
+        await this.finance.recognizeDeliveredOrder(tx, order.id);
+        return tx.order.findUniqueOrThrow({
+          where: { id: order.id },
+          include: { items: true, history: { orderBy: { createdAt: 'asc' } } },
+        });
+      }
+      return saved;
     });
   }
 
@@ -407,7 +436,7 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
             },
           });
           if (claimed.count === 1) {
-            await this.restoreStock(tx, order.items);
+            await this.inventory.releaseOrder(tx, order);
             await tx.orderStatusHistory.create({
               data: {
                 orderId: order.id,
@@ -417,6 +446,10 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
             });
           }
         } else {
+          if (statusChanged && nextStatus === OrderStatus.DELIVERED) {
+            await this.inventory.deliverOrder(tx, order);
+            data.deliveredAt = new Date();
+          }
           if (statusChanged) data.status = nextStatus;
           if (rawChanged || statusChanged) {
             data.history = {
@@ -427,6 +460,9 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
             };
           }
           await tx.order.update({ where: { id: order.id }, data });
+          if (statusChanged && nextStatus === OrderStatus.DELIVERED) {
+            await this.finance.recognizeDeliveredOrder(tx, order.id);
+          }
         }
 
         return tx.order.findUnique({

@@ -18,6 +18,8 @@ import { ContentPagesModule } from './content-pages/content-pages.module';
 import { StoreSettingsModule } from './store-settings/store-settings.module';
 import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { FinanceModule } from './finance/finance.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
     StoreSettingsModule,
     AiAssistantModule,
     DashboardModule,
+    InventoryModule,
+    FinanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

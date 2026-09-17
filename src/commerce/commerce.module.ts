@@ -6,9 +6,17 @@ import { CommerceService } from './commerce.service';
 import { TelegramModule } from '../telegram/telegram.module';
 import { SteadfastModule } from '../steadfast/steadfast.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
+import { InventoryModule } from '../inventory/inventory.module';
+import { FinanceModule } from '../finance/finance.module';
 
 @Module({
-  imports: [TelegramModule, SteadfastModule, StoreSettingsModule],
+  imports: [
+    TelegramModule,
+    SteadfastModule,
+    StoreSettingsModule,
+    InventoryModule,
+    FinanceModule,
+  ],
   controllers: [CommerceController, AdminCommerceController],
   providers: [CommerceService, CommerceAiService],
   exports: [CommerceService],

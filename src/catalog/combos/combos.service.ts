@@ -33,7 +33,7 @@ const comboInclude = {
 export class CombosService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private serialize(combo: any) {
+  private serialize(combo: any, admin = false) {
     const list = (kind: ComboListKind) =>
       combo.listItems
         .filter((item: any) => item.kind === kind)
@@ -70,7 +70,15 @@ export class CombosService {
       })),
       price: toNumber(combo.price),
       compareAtPrice: toNumber(combo.compareAtPrice),
-      stock: combo.stock,
+      stock: Math.max(0, combo.stock - combo.reservedStock),
+      ...(admin
+        ? {
+            onHandStock: combo.stock,
+            reservedStock: combo.reservedStock,
+            soldStock: combo.soldStock,
+            packagingCost: toNumber(combo.packagingCost),
+          }
+        : {}),
       rating: toNumber(combo.rating),
       reviewCount: combo.reviewCount,
       status: combo.status,
@@ -106,7 +114,7 @@ export class CombosService {
       include: comboInclude,
       orderBy: { createdAt: 'desc' },
     });
-    return combos.map((combo) => this.serialize(combo));
+    return combos.map((combo) => this.serialize(combo, includeInactive));
   }
 
   async findOne(slugOrId: string, includeInactive = false) {
@@ -118,7 +126,7 @@ export class CombosService {
       include: comboInclude,
     });
     if (!combo) throw new NotFoundException('সল্যুশন বক্সটি পাওয়া যায়নি');
-    return this.serialize(combo);
+    return this.serialize(combo, includeInactive);
   }
 
   private listItems(kind: ComboListKind, values: TextInput[] = []) {
@@ -147,6 +155,7 @@ export class CombosService {
       price: input.price,
       compareAtPrice: input.compareAtPrice,
       stock: input.stock,
+      packagingCost: input.packagingCost ?? 0,
       rating: input.rating,
       reviewCount: input.reviewCount ?? 0,
       status: input.status ?? 'ACTIVE',
@@ -229,7 +238,7 @@ export class CombosService {
       },
       include: comboInclude,
     });
-    return this.serialize(combo);
+    return this.serialize(combo, true);
   }
 
   async update(id: string, input: ComboInput) {
@@ -246,7 +255,7 @@ export class CombosService {
         data: { ...this.scalar(input), ...this.nested(input) },
         include: comboInclude,
       });
-      return this.serialize(combo);
+      return this.serialize(combo, true);
     });
   }
 

@@ -17,6 +17,8 @@ export type ProductInput = {
   price: number;
   compareAtPrice?: number | null;
   stock: number;
+  purchaseCost?: number;
+  packagingCost?: number;
   rating?: number | null;
   reviewCount?: number;
   status?: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
@@ -37,6 +39,8 @@ export type ProductInput = {
     price?: number | null;
     compareAtPrice?: number | null;
     stock: number;
+    purchaseCost?: number;
+    packagingCost?: number;
     imageUrl?: string | null;
     isActive?: boolean;
     selections: { attribute: string; value: string }[];
@@ -55,6 +59,7 @@ export type ComboInput = {
   price: number;
   compareAtPrice: number;
   stock: number;
+  packagingCost?: number;
   rating?: number | null;
   reviewCount?: number;
   status?: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';

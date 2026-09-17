@@ -21,6 +21,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { SteadfastService } from '../steadfast/steadfast.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { FinanceService } from '../finance/finance.service';
+import type { AdminOrderEditInput } from '../inventory/inventory.types';
 import type {
   AdminOrderStatusInput,
   CareProfileInput,
@@ -117,6 +120,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     private readonly telegram: TelegramService,
     private readonly steadfast: SteadfastService,
     private readonly storeSettings: StoreSettingsService,
+    private readonly inventory: InventoryService,
+    private readonly finance: FinanceService,
   ) {}
 
   onModuleInit() {
@@ -838,7 +843,9 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     if (!product) throw new NotFoundException('পণ্যটি পাওয়া যায়নি');
 
     let price = this.asNumber(product.price);
-    let stock = product.stock;
+    let stock = product.stock - product.reservedStock;
+    let purchaseCost = this.asNumber(product.purchaseCost);
+    let packagingCost = this.asNumber(product.packagingCost);
     let sku = product.sku;
     let name = product.name;
     let image = product.images[0]?.url;
@@ -862,7 +869,9 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       });
       if (!variant) throw new BadRequestException('ভ্যারিয়েন্টটি পাওয়া যায়নি');
       price = variant.price ? this.asNumber(variant.price) : price;
-      stock = variant.stock;
+      stock = variant.stock - variant.reservedStock;
+      purchaseCost = this.asNumber(variant.purchaseCost);
+      packagingCost = this.asNumber(variant.packagingCost);
       sku = variant.sku;
       image = variant.imageUrl ?? image;
       const optionLabel = variant.values
@@ -886,6 +895,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       image,
       unitPrice: this.money(price),
       lineTotal: this.money(price * quantity),
+      purchaseCost: this.money(purchaseCost),
+      packagingCost: this.money(packagingCost),
     };
   }
 
@@ -921,7 +932,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (!combo) throw new NotFoundException('Solution Box পাওয়া যায়নি');
-    if (combo.stock < boxQuantity) {
+    if (combo.stock - combo.reservedStock < boxQuantity) {
       throw new ConflictException('Solution Box পর্যাপ্ত স্টকে নেই');
     }
 
@@ -965,7 +976,10 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           `"${relation.product.name}" এখন অর্ডারের জন্য available নয়`,
         );
       }
-      if (relation.product.stock < quantity * boxQuantity) {
+      if (
+        relation.product.stock - relation.product.reservedStock <
+        quantity * boxQuantity
+      ) {
         throw new ConflictException(
           `"${relation.product.name}" পর্যাপ্ত স্টকে নেই`,
         );
@@ -990,6 +1004,23 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     );
 
     const unitPrice = this.money(customRetail * discountFactor);
+    const purchaseCost = this.money(
+      canonical.reduce(
+        (sum, item) =>
+          sum +
+          this.asNumber(item.relation.product.purchaseCost) * item.quantity,
+        0,
+      ),
+    );
+    const packagingCost = this.money(
+      this.asNumber(combo.packagingCost) +
+        canonical.reduce(
+          (sum, item) =>
+            sum +
+            this.asNumber(item.relation.product.packagingCost) * item.quantity,
+          0,
+        ),
+    );
     const config: QuoteConfigItem[] = canonical.map(
       ({ relation, quantity }) => {
         const productPrice = this.asNumber(relation.product.price);
@@ -1025,6 +1056,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         image: combo.images[0]?.url,
         unitPrice,
         lineTotal: this.money(unitPrice * boxQuantity),
+        purchaseCost,
+        packagingCost,
         customConfig: config,
       } satisfies QuoteLine,
       retailTotal: this.money(customRetail),
@@ -1083,7 +1116,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     const config: QuoteConfigItem[] = products
       .map((product) => {
         const quantity = requested.get(product.id)!;
-        if (product.stock < quantity * boxQuantity) {
+        if (product.stock - product.reservedStock < quantity * boxQuantity) {
           throw new ConflictException(`"${product.name}" পর্যাপ্ত স্টকে নেই`);
         }
         const unitPrice = this.asNumber(product.price);
@@ -1109,6 +1142,24 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     const unitPrice = this.money(
       retailTotal * (1 - appliedDiscountPercent / 100),
     );
+    const purchaseCost = this.money(
+      products.reduce(
+        (sum, product) =>
+          sum +
+          this.asNumber(product.purchaseCost) *
+            (requested.get(product.id) ?? 0),
+        0,
+      ),
+    );
+    const packagingCost = this.money(
+      products.reduce(
+        (sum, product) =>
+          sum +
+          this.asNumber(product.packagingCost) *
+            (requested.get(product.id) ?? 0),
+        0,
+      ),
+    );
 
     return {
       line: {
@@ -1120,6 +1171,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         image: config[0]?.image,
         unitPrice,
         lineTotal: this.money(unitPrice * boxQuantity),
+        purchaseCost,
+        packagingCost,
         customConfig: config,
       } satisfies QuoteLine,
       retailTotal,
@@ -1374,7 +1427,9 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         const currentPrice = item.variant?.price
           ? this.asNumber(item.variant.price)
           : this.asNumber(item.product.price);
-        const stock = item.variant?.stock ?? item.product.stock;
+        const stock = item.variant
+          ? Math.max(0, item.variant.stock - item.variant.reservedStock)
+          : Math.max(0, item.product.stock - item.product.reservedStock);
 
         items.push({
           id: item.id,
@@ -1454,7 +1509,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
             images: item.combo.images.map((image) => image.url),
             price: quote.line.unitPrice,
             compareAtPrice: this.asNumber(item.combo.compareAtPrice),
-            stock: item.combo.stock,
+            stock: Math.max(0, item.combo.stock - item.combo.reservedStock),
             productType: 'combo',
             sku: item.combo.sku,
             comboItems: quote.line.customConfig?.map((config) => ({
@@ -2363,9 +2418,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         : { cart: null };
 
     const order = await this.prisma.$transaction(async (tx) => {
-      for (const line of quote.items) {
-        await this.decrementStockForLine(tx, line);
-      }
+      await this.inventory.reserveQuote(tx, quote.items);
 
       const created = await tx.order.create({
         data: {
@@ -2399,6 +2452,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
               quantity: line.quantity,
               unitPrice: line.unitPrice,
               lineTotal: line.lineTotal,
+              purchaseCostSnapshot: line.purchaseCost,
+              packagingCostSnapshot: line.packagingCost,
               customConfig: line.customConfig
                 ? (line.customConfig as unknown as Prisma.InputJsonValue)
                 : Prisma.DbNull,
@@ -2495,6 +2550,23 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       subtotal: this.asNumber(order.subtotal),
       deliveryCharge: this.asNumber(order.deliveryCharge),
       total: this.asNumber(order.total),
+      ...(!safe
+        ? {
+            revenue: this.asNumber(order.revenue),
+            productCost: this.asNumber(order.productCost),
+            packagingCost: this.asNumber(order.packagingCost),
+            courierCost: this.asNumber(order.courierCost),
+            gatewayFee: this.asNumber(order.gatewayFee),
+            otherCost: this.asNumber(order.otherCost),
+            totalCost: this.asNumber(order.totalCost),
+            grossProfit: this.asNumber(order.grossProfit),
+            netProfit: this.asNumber(order.netProfit),
+            profitMargin: this.asNumber(order.profitMargin),
+            financialRecognized: Boolean(order.financialRecognized),
+            deliveredAt: order.deliveredAt,
+            returnedAt: order.returnedAt,
+          }
+        : {}),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       items: (order.items ?? []).map((item: any) => ({
@@ -2509,6 +2581,12 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         quantity: item.quantity,
         unitPrice: this.asNumber(item.unitPrice),
         lineTotal: this.asNumber(item.lineTotal),
+        ...(!safe
+          ? {
+              purchaseCostSnapshot: this.asNumber(item.purchaseCostSnapshot),
+              packagingCostSnapshot: this.asNumber(item.packagingCostSnapshot),
+            }
+          : {}),
         customConfig: item.customConfig,
       })),
       history: (order.history ?? []).map((history: any) => ({
@@ -2687,7 +2765,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       [OrderStatus.CONFIRMED]: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
       [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
       [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
-      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.DELIVERED]: [OrderStatus.RETURNED],
+      [OrderStatus.RETURNED]: [],
       [OrderStatus.CANCELLED]: [],
     };
     return transitions[current];
@@ -2717,7 +2796,14 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
 
     const updated = await this.prisma.$transaction(async (tx) => {
       if (input.status === OrderStatus.CANCELLED) {
-        await this.restoreStockForOrder(tx, order);
+        await this.inventory.releaseOrder(tx, order);
+      }
+      if (input.status === OrderStatus.DELIVERED) {
+        await this.inventory.deliverOrder(tx, order);
+      }
+      if (input.status === OrderStatus.RETURNED) {
+        await this.inventory.returnOrder(tx, order);
+        await this.finance.reverseReturnedOrder(tx, order.id);
       }
 
       await tx.orderStatusHistory.create({
@@ -2728,14 +2814,30 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         },
       });
 
-      return tx.order.update({
+      const saved = await tx.order.update({
         where: { id: order.id },
-        data: { status: input.status },
+        data: {
+          status: input.status,
+          ...(input.status === OrderStatus.DELIVERED
+            ? { deliveredAt: new Date() }
+            : {}),
+          ...(input.status === OrderStatus.RETURNED
+            ? { returnedAt: new Date() }
+            : {}),
+        },
         include: {
           items: true,
           history: { orderBy: { createdAt: 'asc' } },
         },
       });
+      if (input.status === OrderStatus.DELIVERED) {
+        await this.finance.recognizeDeliveredOrder(tx, order.id);
+        return tx.order.findUniqueOrThrow({
+          where: { id: order.id },
+          include: { items: true, history: { orderBy: { createdAt: 'asc' } } },
+        });
+      }
+      return saved;
     });
 
     if (input.status === OrderStatus.CONFIRMED) {
@@ -2743,6 +2845,146 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       return this.serializeOrder(dispatched, false);
     }
 
+    return this.serializeOrder(updated, false);
+  }
+
+  async adminEditOrder(orderId: string, input: AdminOrderEditInput) {
+    const id = this.requiredText(orderId, 'orderId', 180);
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundException('অর্ডার পাওয়া যায়নি');
+    if (
+      (
+        [
+          OrderStatus.DELIVERED,
+          OrderStatus.RETURNED,
+          OrderStatus.CANCELLED,
+        ] as OrderStatus[]
+      ).includes(order.status)
+    ) {
+      throw new BadRequestException(
+        'Delivered, returned বা cancelled order edit করা যাবে না',
+      );
+    }
+    if (
+      !Array.isArray(input.items) ||
+      input.items.length !== order.items.length
+    ) {
+      throw new BadRequestException('Order-এর প্রতিটি item পাঠাতে হবে');
+    }
+    const edits = new Map(input.items.map((item) => [item.id, item]));
+    for (const item of order.items) {
+      const edit = edits.get(item.id);
+      if (
+        !edit ||
+        !Number.isInteger(Number(edit.quantity)) ||
+        Number(edit.quantity) < 1 ||
+        Number(edit.quantity) > MAX_CART_QUANTITY
+      ) {
+        throw new BadRequestException('Item quantity সঠিক নয়');
+      }
+      if (
+        !Number.isFinite(Number(edit.unitPrice)) ||
+        Number(edit.unitPrice) < 0
+      ) {
+        throw new BadRequestException('Item price সঠিক নয়');
+      }
+    }
+
+    const updated = await this.prisma.$transaction(
+      async (tx) => {
+        await this.inventory.releaseOrder(tx, order);
+        for (const item of order.items) {
+          const edit = edits.get(item.id)!;
+          const quantity = Number(edit.quantity);
+          const unitPrice = this.money(Number(edit.unitPrice));
+          await tx.orderItem.update({
+            where: { id: item.id },
+            data: {
+              quantity,
+              unitPrice,
+              lineTotal: this.money(quantity * unitPrice),
+            },
+          });
+          if (edit.applyPriceToCatalog) {
+            if (item.variantId)
+              await tx.productVariant.update({
+                where: { id: item.variantId },
+                data: { price: unitPrice },
+              });
+            else if (item.productId)
+              await tx.product.update({
+                where: { id: item.productId },
+                data: { price: unitPrice },
+              });
+            else if (item.comboId)
+              await tx.combo.update({
+                where: { id: item.comboId },
+                data: { price: unitPrice },
+              });
+          }
+        }
+        const items = await tx.orderItem.findMany({
+          where: { orderId: order.id },
+        });
+        const lines: QuoteLine[] = items.map((item) => ({
+          clientKey: item.id,
+          itemType: item.itemType,
+          productId: item.productId ?? undefined,
+          variantId: item.variantId ?? undefined,
+          comboId: item.comboId ?? undefined,
+          quantity: item.quantity,
+          name: item.nameSnapshot,
+          sku: item.skuSnapshot ?? undefined,
+          image: item.imageSnapshot ?? undefined,
+          unitPrice: this.asNumber(item.unitPrice),
+          lineTotal: this.asNumber(item.lineTotal),
+          purchaseCost: this.asNumber(item.purchaseCostSnapshot),
+          packagingCost: this.asNumber(item.packagingCostSnapshot),
+          customConfig: Array.isArray(item.customConfig)
+            ? (item.customConfig as unknown as QuoteConfigItem[])
+            : undefined,
+        }));
+        await this.inventory.reserveQuote(tx, lines);
+        const subtotal = this.money(
+          items.reduce((sum, item) => sum + this.asNumber(item.lineTotal), 0),
+        );
+        const deliveryCharge =
+          input.deliveryCharge === undefined
+            ? this.asNumber(order.deliveryCharge)
+            : this.money(Math.max(0, Number(input.deliveryCharge)));
+        await tx.orderStatusHistory.create({
+          data: {
+            orderId: order.id,
+            status: order.status,
+            note:
+              this.cleanText(input.note, 300) ??
+              'Admin updated order items/price',
+          },
+        });
+        return tx.order.update({
+          where: { id: order.id },
+          data: {
+            subtotal,
+            deliveryCharge,
+            total: this.money(subtotal + deliveryCharge),
+            ...(input.courierCost !== undefined
+              ? { courierCost: Math.max(0, Number(input.courierCost)) }
+              : {}),
+            ...(input.gatewayFee !== undefined
+              ? { gatewayFee: Math.max(0, Number(input.gatewayFee)) }
+              : {}),
+            ...(input.otherCost !== undefined
+              ? { otherCost: Math.max(0, Number(input.otherCost)) }
+              : {}),
+          },
+          include: { items: true, history: { orderBy: { createdAt: 'asc' } } },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
     return this.serializeOrder(updated, false);
   }
 

@@ -45,7 +45,7 @@ export class ProductsService {
     }));
   }
 
-  private serialize(product: any) {
+  private serialize(product: any, admin = false) {
     const bullets = (kind: ProductBulletKind) =>
       product.bullets
         .filter((item: any) => item.kind === kind)
@@ -67,7 +67,16 @@ export class ProductsService {
       })),
       price: toNumber(product.price),
       compareAtPrice: toNumber(product.compareAtPrice),
-      stock: product.stock,
+      stock: Math.max(0, product.stock - product.reservedStock),
+      ...(admin
+        ? {
+            onHandStock: product.stock,
+            reservedStock: product.reservedStock,
+            soldStock: product.soldStock,
+            purchaseCost: toNumber(product.purchaseCost),
+            packagingCost: toNumber(product.packagingCost),
+          }
+        : {}),
       rating: toNumber(product.rating),
       reviewCount: product.reviewCount,
       status: product.status,
@@ -100,7 +109,16 @@ export class ProductsService {
         sku: variant.sku,
         price: toNumber(variant.price),
         compareAtPrice: toNumber(variant.compareAtPrice),
-        stock: variant.stock,
+        stock: Math.max(0, variant.stock - variant.reservedStock),
+        ...(admin
+          ? {
+              onHandStock: variant.stock,
+              reservedStock: variant.reservedStock,
+              soldStock: variant.soldStock,
+              purchaseCost: toNumber(variant.purchaseCost),
+              packagingCost: toNumber(variant.packagingCost),
+            }
+          : {}),
         imageUrl: variant.imageUrl,
         isActive: variant.isActive,
         valueIds: variant.values.map((item: any) => item.valueId),
@@ -120,7 +138,7 @@ export class ProductsService {
       include: productInclude,
       orderBy: { createdAt: 'desc' },
     });
-    return products.map((product) => this.serialize(product));
+    return products.map((product) => this.serialize(product, includeInactive));
   }
 
   async findOne(slugOrId: string, includeInactive = false) {
@@ -132,7 +150,7 @@ export class ProductsService {
       include: productInclude,
     });
     if (!product) throw new NotFoundException('পণ্যটি পাওয়া যায়নি');
-    return this.serialize(product);
+    return this.serialize(product, includeInactive);
   }
 
   private async relationalData(input: ProductInput) {
@@ -224,6 +242,12 @@ export class ProductsService {
       price: input.price,
       compareAtPrice: input.compareAtPrice,
       stock: input.stock,
+      ...(input.purchaseCost !== undefined
+        ? { purchaseCost: input.purchaseCost }
+        : {}),
+      ...(input.packagingCost !== undefined
+        ? { packagingCost: input.packagingCost }
+        : {}),
       rating: input.rating,
       reviewCount: input.reviewCount ?? 0,
       status: input.status ?? 'ACTIVE',
@@ -267,6 +291,8 @@ export class ProductsService {
           price: variant.price,
           compareAtPrice: variant.compareAtPrice,
           stock: variant.stock,
+          purchaseCost: variant.purchaseCost ?? 0,
+          packagingCost: variant.packagingCost ?? 0,
           imageUrl: variant.imageUrl,
           isActive: variant.isActive ?? true,
           values: { create: valueIds.map((valueId) => ({ valueId })) },
@@ -289,11 +315,42 @@ export class ProductsService {
         },
       });
       await this.createVariants(tx, product.id, input);
+      if (input.stock > 0) {
+        await tx.inventoryMovement.create({
+          data: {
+            type: 'INITIAL_STOCK',
+            productId: product.id,
+            quantity: input.stock,
+            unitCost: input.purchaseCost ?? 0,
+            previousStock: 0,
+            newStock: input.stock,
+            note: 'Product created with initial stock',
+          },
+        });
+      }
+      const variants = await tx.productVariant.findMany({
+        where: { productId: product.id },
+      });
+      for (const variant of variants) {
+        if (variant.stock <= 0) continue;
+        await tx.inventoryMovement.create({
+          data: {
+            type: 'INITIAL_STOCK',
+            productId: product.id,
+            variantId: variant.id,
+            quantity: variant.stock,
+            unitCost: variant.purchaseCost,
+            previousStock: 0,
+            newStock: variant.stock,
+            note: 'Variant created with initial stock',
+          },
+        });
+      }
       const created = await tx.product.findUniqueOrThrow({
         where: { id: product.id },
         include: productInclude,
       });
-      return this.serialize(created);
+      return this.serialize(created, true);
     });
   }
 
@@ -322,7 +379,7 @@ export class ProductsService {
         where: { id },
         include: productInclude,
       });
-      return this.serialize(product);
+      return this.serialize(product, true);
     });
   }
 

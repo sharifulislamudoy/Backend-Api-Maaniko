@@ -134,6 +134,8 @@ export type QuoteLine = {
   image?: string;
   unitPrice: number;
   lineTotal: number;
+  purchaseCost: number;
+  packagingCost: number;
   customConfig?: QuoteConfigItem[];
 };
 

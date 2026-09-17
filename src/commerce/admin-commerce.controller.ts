@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  Delete,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -14,6 +15,13 @@ import { Roles, RolesGuard } from '../auth/roles.guard';
 import { CommerceAiService } from './commerce-ai.service';
 import { CommerceService } from './commerce.service';
 import { SteadfastService } from '../steadfast/steadfast.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { FinanceService } from '../finance/finance.service';
+import type {
+  AdminOrderEditInput,
+  InventoryAdjustmentInput,
+} from '../inventory/inventory.types';
+import { ExpenseCategory } from '@prisma/client';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles(Role.ADMIN, Role.SUPER_ADMIN)
@@ -23,6 +31,8 @@ export class AdminCommerceController {
     private readonly commerce: CommerceService,
     private readonly ai: CommerceAiService,
     private readonly steadfast: SteadfastService,
+    private readonly inventory: InventoryService,
+    private readonly finance: FinanceService,
   ) {}
 
   @Get('orders')
@@ -41,6 +51,58 @@ export class AdminCommerceController {
     @Body() body: { status: OrderStatus; note?: string },
   ) {
     return this.commerce.adminUpdateOrderStatus(orderId, body);
+  }
+
+  @Patch('orders/:orderId')
+  editOrder(
+    @Param('orderId') orderId: string,
+    @Body() body: AdminOrderEditInput,
+  ) {
+    return this.commerce.adminEditOrder(orderId, body);
+  }
+
+  @Get('inventory')
+  inventoryList(@Query('search') search?: string) {
+    return this.inventory.list(search);
+  }
+
+  @Post('inventory/adjust')
+  adjustInventory(@Body() body: InventoryAdjustmentInput) {
+    return this.inventory.adjust(body);
+  }
+
+  @Get('inventory/products/:productId/history')
+  productInventoryHistory(@Param('productId') productId: string) {
+    return this.inventory.productHistory(productId);
+  }
+
+  @Get('inventory/suppliers')
+  suppliers() {
+    return this.inventory.suppliers();
+  }
+
+  @Get('finance/summary')
+  financeSummary(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.finance.summary(from, to);
+  }
+
+  @Post('finance/expenses')
+  createExpense(
+    @Body()
+    body: {
+      category: ExpenseCategory;
+      title: string;
+      amount: number;
+      expenseDate: string;
+      note?: string;
+    },
+  ) {
+    return this.finance.createExpense(body);
+  }
+
+  @Delete('finance/expenses/:expenseId')
+  deleteExpense(@Param('expenseId') expenseId: string) {
+    return this.finance.deleteExpense(expenseId);
   }
 
   @Patch('orders/:orderId/manual-status')
