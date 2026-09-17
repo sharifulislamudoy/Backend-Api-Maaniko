@@ -25,6 +25,13 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Get('admin/categories')
+  categoryOptions() {
+    return this.products.categoryOptions();
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Get('admin/all')
   findAllAdmin() {
     return this.products.findAll(true);

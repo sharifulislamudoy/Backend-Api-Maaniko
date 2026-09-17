@@ -31,6 +31,20 @@ const productInclude = {
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async categoryOptions() {
+    const categories = await this.prisma.category.findMany({
+      orderBy: { name: 'asc' },
+      include: { _count: { select: { products: true } } },
+    });
+
+    return categories.map((category) => ({
+      id: category.id,
+      slug: category.slug,
+      name: category.name,
+      productCount: category._count.products,
+    }));
+  }
+
   private serialize(product: any) {
     const bullets = (kind: ProductBulletKind) =>
       product.bullets
@@ -180,7 +194,10 @@ export class ProductsService {
             sortOrder,
             values: {
               create: attribute.values.map((value, valueOrder) => {
-                const option = requiredText(value.value, 'attributes.values.value');
+                const option = requiredText(
+                  value.value,
+                  'attributes.values.value',
+                );
                 return {
                   value: option,
                   colorHex: value.colorHex,
