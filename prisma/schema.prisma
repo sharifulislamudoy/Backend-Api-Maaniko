@@ -135,6 +135,12 @@ enum ConsentType {
   WHATSAPP_MARKETING
 }
 
+enum PushNotificationType {
+  OFFER
+  ORDER_STATUS
+  TEST
+}
+
 enum ContentPageCategory {
   SUPPORT
   POLICY
@@ -560,6 +566,7 @@ model CustomerProfile {
   orders       Order[]
   leads        CustomerLead[]
   consents     ConsentLog[]
+  pushDevices  PushDevice[]
 
   @@unique([normalizedName, normalizedPhone])
   @@index([normalizedPhone])
@@ -588,6 +595,41 @@ model DeviceIdentity {
   updatedAt   DateTime         @updatedAt
 
   @@index([customerId])
+}
+
+model PushDevice {
+  id          String           @id @default(cuid())
+  token       String           @unique @db.Text
+  guestId     String
+  customerId  String?
+  customer    CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  platform    String?
+  userAgent   String?          @db.Text
+  allowOffers Boolean          @default(true)
+  enabled     Boolean          @default(true)
+  lastSeenAt  DateTime         @default(now())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([guestId])
+  @@index([customerId, enabled])
+  @@index([enabled, allowOffers])
+}
+
+model PushCampaign {
+  id           String               @id @default(cuid())
+  type         PushNotificationType @default(OFFER)
+  title        String
+  body         String               @db.Text
+  imageUrl     String?
+  link         String?
+  recipientCount Int                @default(0)
+  sentCount    Int                  @default(0)
+  failureCount Int                  @default(0)
+  createdAt    DateTime             @default(now())
+
+  @@index([type, createdAt])
+  @@index([createdAt])
 }
 
 model TrackingSession {

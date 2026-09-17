@@ -23,6 +23,7 @@ import { SteadfastService } from '../steadfast/steadfast.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { FinanceService } from '../finance/finance.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import type { AdminOrderEditInput } from '../inventory/inventory.types';
 import type {
   AdminOrderStatusInput,
@@ -122,6 +123,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     private readonly storeSettings: StoreSettingsService,
     private readonly inventory: InventoryService,
     private readonly finance: FinanceService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   onModuleInit() {
@@ -525,6 +527,10 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       this.prisma.cart.updateMany({
         where: { guestId, customerId: null },
         data: { customerId },
+      }),
+      this.prisma.pushDevice.updateMany({
+        where: { guestId },
+        data: { customerId, lastSeenAt: new Date() },
       }),
     ]);
   }
@@ -2513,6 +2519,13 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       })),
     });
 
+    void this.notifications.sendOrderStatus({
+      customerId: order.customerId,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      trackingToken: order.publicTrackingToken,
+    });
+
     return {
       customer: identified.customer,
       customerToken: identified.customerToken,
@@ -2838,6 +2851,13 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         });
       }
       return saved;
+    });
+
+    await this.notifications.sendOrderStatus({
+      customerId: updated.customerId,
+      orderNumber: updated.orderNumber,
+      status: updated.status,
+      trackingToken: updated.publicTrackingToken,
     });
 
     if (input.status === OrderStatus.CONFIRMED) {

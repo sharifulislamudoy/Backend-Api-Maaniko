@@ -13,6 +13,7 @@ import { CartItemType, OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { FinanceService } from '../finance/finance.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 type CreateOrderResponse = {
   status: number;
@@ -61,6 +62,7 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
     private readonly config: ConfigService,
     private readonly inventory: InventoryService,
     private readonly finance: FinanceService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   onModuleInit() {
@@ -224,7 +226,7 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
       }
 
       const rawStatus = result.consignment.status || 'in_review';
-      return this.prisma.order.update({
+      const updated = await this.prisma.order.update({
         where: { id: order.id },
         data: {
           status: OrderStatus.PROCESSING,
@@ -246,6 +248,13 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
           history: { orderBy: { createdAt: 'asc' } },
         },
       });
+      await this.notifications.sendOrderStatus({
+        customerId: updated.customerId,
+        orderNumber: updated.orderNumber,
+        status: updated.status,
+        trackingToken: updated.publicTrackingToken,
+      });
+      return updated;
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Steadfast dispatch failed';
@@ -342,7 +351,7 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       if (status === OrderStatus.CANCELLED) {
         await this.inventory.releaseOrder(tx, order);
       }
@@ -390,6 +399,13 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
       }
       return saved;
     });
+    await this.notifications.sendOrderStatus({
+      customerId: updated.customerId,
+      orderNumber: updated.orderNumber,
+      status: updated.status,
+      trackingToken: updated.publicTrackingToken,
+    });
+    return updated;
   }
 
   async syncOrder(orderId: string) {
@@ -418,7 +434,7 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
       const rawChanged = rawStatus !== order.steadfastStatus;
       const statusChanged = nextStatus !== order.status;
 
-      return this.prisma.$transaction(async (tx) => {
+      const updated = await this.prisma.$transaction(async (tx) => {
         const data: Prisma.OrderUpdateInput = {
           steadfastStatus: rawStatus,
           steadfastLastSyncedAt: new Date(),
@@ -473,6 +489,15 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
           },
         });
       });
+      if (statusChanged && updated) {
+        await this.notifications.sendOrderStatus({
+          customerId: updated.customerId,
+          orderNumber: updated.orderNumber,
+          status: updated.status,
+          trackingToken: updated.publicTrackingToken,
+        });
+      }
+      return updated;
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Steadfast sync failed';

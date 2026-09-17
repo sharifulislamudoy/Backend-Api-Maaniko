@@ -20,6 +20,7 @@ import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { FinanceModule } from './finance/finance.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { FinanceModule } from './finance/finance.module';
     DashboardModule,
     InventoryModule,
     FinanceModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
