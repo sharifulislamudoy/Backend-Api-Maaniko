@@ -189,6 +189,36 @@ export class NotificationsService {
     return { subscribed: false };
   }
 
+  async inbox(identity: PushIdentity) {
+    const guestId = this.clean(identity.guestId, 180);
+    const customerId = guestId
+      ? await this.customerId({ ...identity, guestId })
+      : null;
+
+    const notifications = await this.prisma.pushInboxItem.findMany({
+      where: {
+        OR: [
+          { isGlobal: true },
+          ...(guestId ? [{ guestId }] : []),
+          ...(customerId ? [{ customerId }] : []),
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        body: true,
+        imageUrl: true,
+        link: true,
+        createdAt: true,
+      },
+    });
+
+    return { notifications };
+  }
+
   private async send(
     tokens: string[],
     message: Omit<MulticastMessage, 'tokens'>,
@@ -264,21 +294,48 @@ export class NotificationsService {
         )
       : { recipientCount: 0, sentCount: 0, failureCount: 0 };
 
-    const campaign = await this.prisma.pushCampaign.create({
-      data: {
-        type: PushNotificationType.OFFER,
-        title,
-        body,
-        link,
-        imageUrl,
-        ...result,
-      },
-    });
+    const [campaign] = await this.prisma.$transaction([
+      this.prisma.pushCampaign.create({
+        data: {
+          type: PushNotificationType.OFFER,
+          title,
+          body,
+          link,
+          imageUrl,
+          ...result,
+        },
+      }),
+      this.prisma.pushInboxItem.create({
+        data: {
+          type: PushNotificationType.OFFER,
+          title,
+          body,
+          link,
+          imageUrl,
+          isGlobal: true,
+        },
+      }),
+    ]);
     return { campaign, ...result };
   }
 
   async sendOrderStatus(input: OrderStatusPushInput) {
     try {
+      const copy = STATUS_COPY[input.status];
+      const link = input.trackingToken
+        ? `/track-order/${encodeURIComponent(input.trackingToken)}`
+        : '/orders';
+
+      await this.prisma.pushInboxItem.create({
+        data: {
+          type: PushNotificationType.ORDER_STATUS,
+          title: copy.title,
+          body: `${input.orderNumber}: ${copy.body}`,
+          link,
+          customerId: input.customerId,
+        },
+      });
+
       const devices = await this.prisma.pushDevice.findMany({
         where: { customerId: input.customerId, enabled: true },
         select: { token: true },
@@ -286,10 +343,6 @@ export class NotificationsService {
       if (!devices.length)
         return { recipientCount: 0, sentCount: 0, failureCount: 0 };
 
-      const copy = STATUS_COPY[input.status];
-      const link = input.trackingToken
-        ? `/track-order/${encodeURIComponent(input.trackingToken)}`
-        : '/orders';
       const publicSiteUrl = (
         this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3000'
       ).replace(/\/$/, '');

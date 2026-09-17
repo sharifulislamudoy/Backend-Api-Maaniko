@@ -567,6 +567,7 @@ model CustomerProfile {
   leads        CustomerLead[]
   consents     ConsentLog[]
   pushDevices  PushDevice[]
+  pushNotifications PushInboxItem[]
 
   @@unique([normalizedName, normalizedPhone])
   @@index([normalizedPhone])
@@ -630,6 +631,24 @@ model PushCampaign {
 
   @@index([type, createdAt])
   @@index([createdAt])
+}
+
+model PushInboxItem {
+  id         String               @id @default(cuid())
+  type       PushNotificationType
+  title      String
+  body       String               @db.Text
+  imageUrl   String?
+  link       String?
+  isGlobal   Boolean              @default(false)
+  guestId    String?
+  customerId String?
+  customer   CustomerProfile?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime             @default(now())
+
+  @@index([isGlobal, createdAt])
+  @@index([guestId, createdAt])
+  @@index([customerId, createdAt])
 }
 
 model TrackingSession {

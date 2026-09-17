@@ -36,6 +36,14 @@ export class PushNotificationsController {
     );
   }
 
+  @Get('inbox')
+  inbox(
+    @Headers('x-maaniko-guest-id') guestId?: string,
+    @Headers('x-maaniko-customer-token') customerToken?: string,
+  ) {
+    return this.notifications.inbox(this.identity(guestId, customerToken));
+  }
+
   @Delete('devices')
   unregister(
     @Body() body: { token?: string },
