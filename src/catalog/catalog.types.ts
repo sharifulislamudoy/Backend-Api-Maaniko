@@ -19,6 +19,7 @@ export type ProductInput = {
   stock: number;
   purchaseCost?: number;
   packagingCost?: number;
+  reorderAfterDays?: number | null;
   rating?: number | null;
   reviewCount?: number;
   status?: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';

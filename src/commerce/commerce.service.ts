@@ -2019,6 +2019,36 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
+    const [product, combo] = await Promise.all([
+      input.productId
+        ? this.prisma.product.findUnique({ where: { id: input.productId } })
+        : null,
+      input.comboId
+        ? this.prisma.combo.findUnique({ where: { id: input.comboId } })
+        : null,
+    ]);
+    const entity = product ?? combo;
+    if ((input.productId || input.comboId) && !entity) {
+      throw new NotFoundException('Product পাওয়া যায়নি');
+    }
+
+    if (
+      customer &&
+      (input.type === LeadType.PRICE_DROP ||
+        input.type === LeadType.BACK_IN_STOCK)
+    ) {
+      await this.prisma.customerLead.updateMany({
+        where: {
+          customerId: customer.id,
+          type: input.type,
+          productId: input.productId ?? null,
+          comboId: input.comboId ?? null,
+          isActive: true,
+        },
+        data: { isActive: false },
+      });
+    }
+
     const lead = await this.prisma.customerLead.create({
       data: {
         type: input.type,
@@ -2026,6 +2056,10 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         customerId: customer?.id,
         productId: this.cleanText(input.productId, 180),
         comboId: this.cleanText(input.comboId, 180),
+        baselinePrice: entity?.price,
+        baselineStock: entity
+          ? Math.max(0, entity.stock - entity.reservedStock)
+          : null,
         data: this.sanitizeMetadata(input.data) ?? Prisma.JsonNull,
       },
     });
@@ -2090,6 +2124,26 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         ? undefined
         : Math.max(0, Math.round(Number(input.budgetMax)));
 
+    const parseOptionalDate = (
+      value: string | null | undefined,
+      field: string,
+    ) => {
+      if (value === undefined) return undefined;
+      if (value === null || value === '') return null;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime()))
+        throw new BadRequestException(`${field} সঠিক নয়`);
+      return date;
+    };
+    const babyBirthDate = parseOptionalDate(
+      input.babyBirthDate,
+      'Baby birth date',
+    );
+    const expectedDeliveryDate = parseOptionalDate(
+      input.expectedDeliveryDate,
+      'Expected delivery date',
+    );
+
     if (
       budgetMin !== undefined &&
       budgetMax !== undefined &&
@@ -2109,6 +2163,20 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           : {}),
         ...(budgetMin !== undefined ? { budgetMin } : {}),
         ...(budgetMax !== undefined ? { budgetMax } : {}),
+        ...(babyBirthDate !== undefined ? { babyBirthDate } : {}),
+        ...(expectedDeliveryDate !== undefined ? { expectedDeliveryDate } : {}),
+        ...(input.babyGender !== undefined
+          ? { babyGender: this.cleanText(input.babyGender, 40) ?? null }
+          : {}),
+        ...(input.feedingPreference !== undefined
+          ? {
+              feedingPreference:
+                this.cleanText(input.feedingPreference, 80) ?? null,
+            }
+          : {}),
+        ...(input.reorderRemindersEnabled !== undefined
+          ? { reorderRemindersEnabled: Boolean(input.reorderRemindersEnabled) }
+          : {}),
         lastSeenAt: new Date(),
       },
     });
@@ -2233,12 +2301,38 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       items.reduce((sum, item) => sum + item.lineTotal, 0),
     );
     const deliveryCharge = this.money(this.deliveryCharge(subtotal));
+    const customer = await this.customerForIdentity(identity);
+    const rewardPointsAvailable = customer?.rewardBalance ?? 0;
+    const requestedPoints = Math.max(
+      0,
+      Math.floor(Number(input.rewardPointsToUse ?? 0)),
+    );
+    const pointValue = Math.max(
+      0.01,
+      Number(process.env.REWARD_POINT_VALUE_BDT ?? 1),
+    );
+    const maximumPercent = Math.min(
+      100,
+      Math.max(0, Number(process.env.REWARD_MAX_REDEMPTION_PERCENT ?? 50)),
+    );
+    const maximumDiscount = subtotal * (maximumPercent / 100);
+    const rewardPointsUsed = Math.min(
+      requestedPoints,
+      rewardPointsAvailable,
+      Math.floor(maximumDiscount / pointValue),
+    );
+    const rewardDiscount = this.money(rewardPointsUsed * pointValue);
 
     return {
       items,
       subtotal,
       deliveryCharge,
-      total: this.money(subtotal + deliveryCharge),
+      rewardPointsAvailable,
+      rewardPointsUsed,
+      rewardDiscount,
+      total: this.money(
+        Math.max(0, subtotal + deliveryCharge - rewardDiscount),
+      ),
     };
   }
 
@@ -2423,6 +2517,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     const quote = await this.quoteOrder(nextIdentity, {
       mode: input.mode,
       item: input.item,
+      rewardPointsToUse: input.rewardPointsToUse,
     });
 
     const cartResult =
@@ -2453,6 +2548,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           subtotal: quote.subtotal,
           deliveryCharge: quote.deliveryCharge,
           total: quote.total,
+          rewardPointsUsed: quote.rewardPointsUsed,
+          rewardDiscount: quote.rewardDiscount,
           items: {
             create: quote.items.map((line) => ({
               itemType: line.itemType,
@@ -2492,6 +2589,31 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
             status: CartStatus.CONVERTED,
             convertedAt: new Date(),
             lastActivityAt: new Date(),
+          },
+        });
+      }
+
+      if (quote.rewardPointsUsed > 0) {
+        const balanceUpdate = await tx.customerProfile.updateMany({
+          where: {
+            id: identified.customer.id,
+            rewardBalance: { gte: quote.rewardPointsUsed },
+          },
+          data: { rewardBalance: { decrement: quote.rewardPointsUsed } },
+        });
+        if (balanceUpdate.count !== 1) {
+          throw new ConflictException(
+            'Reward point balance পরিবর্তিত হয়েছে; আবার quote নিন',
+          );
+        }
+        await tx.rewardTransaction.create({
+          data: {
+            customerId: identified.customer.id,
+            orderId: created.id,
+            type: 'REDEEM',
+            points: -quote.rewardPointsUsed,
+            description: `${created.orderNumber} checkout discount`,
+            dedupeKey: `redeem:${created.id}`,
           },
         });
       }
@@ -2569,6 +2691,8 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       publicTrackingExpiresAt: order.publicTrackingExpiresAt,
       subtotal: this.asNumber(order.subtotal),
       deliveryCharge: this.asNumber(order.deliveryCharge),
+      rewardPointsUsed: Number(order.rewardPointsUsed ?? 0),
+      rewardDiscount: this.asNumber(order.rewardDiscount),
       total: this.asNumber(order.total),
       ...(!safe
         ? {

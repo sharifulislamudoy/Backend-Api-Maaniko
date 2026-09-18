@@ -22,6 +22,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { FinanceModule } from './finance/finance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { EngagementModule } from './engagement/engagement.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     FinanceModule,
     NotificationsModule,
     ReviewsModule,
+    EngagementModule,
   ],
   controllers: [AppController],
   providers: [AppService],

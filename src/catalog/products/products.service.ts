@@ -81,6 +81,7 @@ export class ProductsService {
       reviewCount: product.reviewCount,
       status: product.status,
       featured: product.featured,
+      reorderAfterDays: product.reorderAfterDays,
       productType: 'single',
       journeys: product.journeys.map((item: any) => ({
         slug: item.journey.slug,
@@ -252,6 +253,10 @@ export class ProductsService {
       reviewCount: input.reviewCount ?? 0,
       status: input.status ?? 'ACTIVE',
       featured: input.featured ?? false,
+      reorderAfterDays:
+        input.reorderAfterDays === null || input.reorderAfterDays === undefined
+          ? null
+          : Math.max(1, Math.round(input.reorderAfterDays)),
       categoryId,
     };
   }

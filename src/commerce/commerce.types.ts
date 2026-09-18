@@ -68,6 +68,7 @@ export type BuyNowItemInput = {
 export type OrderQuoteInput = {
   mode: 'CART' | 'BUY_NOW';
   item?: BuyNowItemInput;
+  rewardPointsToUse?: number;
 };
 
 export type CreateOrderInput = OrderQuoteInput & {
@@ -101,6 +102,11 @@ export type CareProfileInput = {
   interests?: string[];
   budgetMin?: number;
   budgetMax?: number;
+  babyBirthDate?: string | null;
+  expectedDeliveryDate?: string | null;
+  babyGender?: string | null;
+  feedingPreference?: string | null;
+  reorderRemindersEnabled?: boolean;
 };
 
 export type RestoreInput = {
@@ -143,5 +149,8 @@ export type OrderQuote = {
   items: QuoteLine[];
   subtotal: number;
   deliveryCharge: number;
+  rewardPointsAvailable: number;
+  rewardPointsUsed: number;
+  rewardDiscount: number;
   total: number;
 };

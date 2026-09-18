@@ -261,6 +261,87 @@ export class NotificationsService {
     return { recipientCount: uniqueTokens.length, sentCount, failureCount };
   }
 
+  async sendCustomerMessage(input: {
+    customerId: string;
+    title: string;
+    body: string;
+    link: string;
+    tag: string;
+    imageUrl?: string;
+  }) {
+    const title = this.clean(input.title, 100);
+    const body = this.clean(input.body, 240);
+    const link = this.clean(input.link, 500) || '/';
+    const imageUrl = this.clean(input.imageUrl, 1000) || undefined;
+    if (!title || !body || !input.customerId) {
+      throw new BadRequestException('Customer notification data সঠিক নয়');
+    }
+
+    await this.prisma.pushInboxItem.create({
+      data: {
+        type: PushNotificationType.OFFER,
+        title,
+        body,
+        link,
+        imageUrl,
+        customerId: input.customerId,
+      },
+    });
+
+    const devices = await this.prisma.pushDevice.findMany({
+      where: {
+        customerId: input.customerId,
+        enabled: true,
+      },
+      select: { token: true },
+    });
+    if (!devices.length) {
+      return {
+        recipientCount: 0,
+        sentCount: 0,
+        failureCount: 0,
+        inboxOnly: true,
+      };
+    }
+
+    const publicSiteUrl = (
+      this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3000'
+    ).replace(/\/$/, '');
+    const webLink = /^https?:\/\//i.test(link)
+      ? link
+      : `${publicSiteUrl}${link.startsWith('/') ? link : `/${link}`}`;
+
+    try {
+      return await this.send(
+        devices.map((device) => device.token),
+        {
+          notification: { title, body, imageUrl },
+          data: { type: 'OFFER', link },
+          webpush: {
+            fcmOptions: { link: webLink },
+            notification: {
+              icon: '/icons/pwa-192.png',
+              badge: '/icons/pwa-192.png',
+              image: imageUrl,
+              tag: this.clean(input.tag, 100) || `customer-${Date.now()}`,
+              renotify: true,
+            },
+          },
+        },
+      );
+    } catch (error) {
+      this.logger.error(
+        `Customer lifecycle push failed: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+      return {
+        recipientCount: devices.length,
+        sentCount: 0,
+        failureCount: devices.length,
+        inboxOnly: true,
+      };
+    }
+  }
+
   async sendOffer(input: SendOfferInput) {
     const title = this.clean(input.title, 100);
     const body = this.clean(input.body, 240);
