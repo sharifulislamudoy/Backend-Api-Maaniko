@@ -5,12 +5,28 @@ import {
 } from '@nestjs/common';
 import { BannerPlacement, type Banner } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { optionalText, required } from '../catalog.helpers';
 import type { BannerInput } from '../catalog.types';
 
 @Injectable()
 export class BannersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
+
+  private async notifyFirstPublication(banner: Banner, wasPublished: boolean) {
+    if (!banner.isPublished || wasPublished) return;
+    await this.notifications.sendBannerPublished({
+      id: banner.id,
+      title: banner.title,
+      eyebrow: banner.eyebrow,
+      description: banner.description,
+      desktopImage: banner.desktopImage,
+      link: banner.link,
+    });
+  }
 
   private serialize(banner: Banner) {
     return {
@@ -84,22 +100,22 @@ export class BannersService {
   }
 
   async create(input: BannerInput) {
-    return this.serialize(
-      await this.prisma.banner.create({
-        data: { ...(input.id ? { id: input.id } : {}), ...this.data(input) },
-      }),
-    );
+    const banner = await this.prisma.banner.create({
+      data: { ...(input.id ? { id: input.id } : {}), ...this.data(input) },
+    });
+    await this.notifyFirstPublication(banner, false);
+    return this.serialize(banner);
   }
 
   async update(id: string, input: BannerInput) {
     const exists = await this.prisma.banner.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('ব্যানারটি পাওয়া যায়নি');
-    return this.serialize(
-      await this.prisma.banner.update({
-        where: { id },
-        data: this.data(input),
-      }),
-    );
+    const banner = await this.prisma.banner.update({
+      where: { id },
+      data: this.data(input),
+    });
+    await this.notifyFirstPublication(banner, exists.isPublished);
+    return this.serialize(banner);
   }
 
   async updatePublication(id: string, isPublished: boolean) {
@@ -110,12 +126,12 @@ export class BannersService {
     const exists = await this.prisma.banner.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('ব্যানারটি পাওয়া যায়নি');
 
-    return this.serialize(
-      await this.prisma.banner.update({
-        where: { id },
-        data: { isPublished },
-      }),
-    );
+    const banner = await this.prisma.banner.update({
+      where: { id },
+      data: { isPublished },
+    });
+    await this.notifyFirstPublication(banner, exists.isPublished);
+    return this.serialize(banner);
   }
 
   async remove(id: string) {

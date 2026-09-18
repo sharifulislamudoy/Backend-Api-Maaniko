@@ -453,6 +453,7 @@ export class InventoryService {
       variants: product.variants.map((variant) => ({
         id: variant.id,
         sku: variant.sku,
+        image: variant.imageUrl ?? product.images[0]?.url ?? null,
         label: variant.values
           .map((entry) => `${entry.value.attribute.name}: ${entry.value.value}`)
           .join(', '),

@@ -137,8 +137,17 @@ enum ConsentType {
 
 enum PushNotificationType {
   OFFER
+  BANNER
   ORDER_STATUS
   TEST
+}
+
+enum PushCampaignStatus {
+  DRAFT
+  SENDING
+  SENT
+  PARTIAL
+  FAILED
 }
 
 enum RewardTransactionType {
@@ -248,19 +257,19 @@ model AiKnowledgeEntry {
 }
 
 model AiSupportTicket {
-  id              String          @id @default(cuid())
-  conversationId  String          @unique
-  visitorHash     String
-  question        String          @db.Text
-  pagePath        String?
-  failureReason   String          @db.Text
-  status          AiSupportStatus @default(PENDING)
-  adminReply      String?         @db.Text
-  repliedBy       String?
-  repliedAt       DateTime?
-  lastNotifiedAt  DateTime?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id             String          @id @default(cuid())
+  conversationId String          @unique
+  visitorHash    String
+  question       String          @db.Text
+  pagePath       String?
+  failureReason  String          @db.Text
+  status         AiSupportStatus @default(PENDING)
+  adminReply     String?         @db.Text
+  repliedBy      String?
+  repliedAt      DateTime?
+  lastNotifiedAt DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([status, updatedAt])
   @@index([visitorHash, updatedAt])
@@ -694,15 +703,20 @@ model PushDevice {
 model PushCampaign {
   id             String               @id @default(cuid())
   type           PushNotificationType @default(OFFER)
+  status         PushCampaignStatus   @default(DRAFT)
   title          String
   body           String               @db.Text
   imageUrl       String?
   link           String?
+  sourceKey      String?              @unique
   recipientCount Int                  @default(0)
   sentCount      Int                  @default(0)
   failureCount   Int                  @default(0)
+  sentAt         DateTime?
   createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 
+  @@index([status, createdAt])
   @@index([type, createdAt])
   @@index([createdAt])
 }

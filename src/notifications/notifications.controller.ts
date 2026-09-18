@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Headers,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { Role } from '@prisma/client';
 import { Roles, RolesGuard } from '../auth/roles.guard';
 import { NotificationsService } from './notifications.service';
 import type {
+  CreatePushCampaignInput,
   RegisterPushDeviceInput,
   SendOfferInput,
 } from './notifications.types';
@@ -71,5 +73,20 @@ export class AdminNotificationsController {
   @Post('offers')
   sendOffer(@Body() body: SendOfferInput) {
     return this.notifications.sendOffer(body);
+  }
+
+  @Post('drafts')
+  createDraft(@Body() body: CreatePushCampaignInput) {
+    return this.notifications.createDraft(body);
+  }
+
+  @Post('campaigns/:id/send')
+  sendCampaign(@Param('id') id: string) {
+    return this.notifications.sendCampaign(id);
+  }
+
+  @Delete('drafts/:id')
+  deleteDraft(@Param('id') id: string) {
+    return this.notifications.deleteDraft(id);
   }
 }

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProductBulletKind } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { ProductInput } from '../catalog.types';
@@ -261,17 +266,22 @@ export class ProductsService {
     };
   }
 
-  private async createVariants(
+  private async syncVariants(
     client: any,
     productId: string,
     input: ProductInput,
+    preserveExisting = false,
   ) {
-    if (!input.variants?.length) return;
     const attributes = await client.productAttribute.findMany({
       where: { productId },
       include: { values: true },
     });
-    for (const variant of input.variants) {
+    const existing = preserveExisting
+      ? await client.productVariant.findMany({ where: { productId } })
+      : [];
+    const retainedIds = new Set<string>();
+
+    for (const variant of input.variants ?? []) {
       const valueIds = variant.selections.map((selection) => {
         const attribute = attributes.find(
           (item: any) =>
@@ -288,21 +298,86 @@ export class ProductsService {
         }
         return value.id;
       });
-      await client.productVariant.create({
-        data: {
-          ...(variant.id ? { id: variant.id } : {}),
-          productId,
-          sku: variant.sku,
-          price: variant.price,
-          compareAtPrice: variant.compareAtPrice,
-          stock: variant.stock,
-          purchaseCost: variant.purchaseCost ?? 0,
-          packagingCost: variant.packagingCost ?? 0,
-          imageUrl: variant.imageUrl,
-          isActive: variant.isActive ?? true,
-          values: { create: valueIds.map((valueId) => ({ valueId })) },
-        },
-      });
+      const current = existing.find(
+        (item: any) =>
+          (variant.id && item.id === variant.id) || item.sku === variant.sku,
+      );
+      if (variant.id && !current && preserveExisting) {
+        throw new BadRequestException('Variant id এই product-এর নয়');
+      }
+      if (current && variant.stock < current.reservedStock) {
+        throw new ConflictException(
+          `${variant.sku}-তে কমপক্ষে ${current.reservedStock} on-hand stock রাখতে হবে; এগুলো order-এর জন্য reserved`,
+        );
+      }
+
+      const data = {
+        sku: variant.sku,
+        price: variant.price,
+        compareAtPrice: variant.compareAtPrice,
+        stock: variant.stock,
+        purchaseCost: variant.purchaseCost ?? 0,
+        packagingCost: variant.packagingCost ?? 0,
+        imageUrl: variant.imageUrl,
+        isActive: variant.isActive ?? true,
+        values: { create: valueIds.map((valueId) => ({ valueId })) },
+      };
+      if (current) {
+        await client.productVariant.update({
+          where: { id: current.id },
+          data,
+        });
+        retainedIds.add(current.id);
+        if (current.stock !== variant.stock) {
+          await client.inventoryMovement.create({
+            data: {
+              type: 'ADJUSTMENT',
+              productId,
+              variantId: current.id,
+              quantity: variant.stock - current.stock,
+              unitCost: variant.purchaseCost ?? 0,
+              previousStock: current.stock,
+              newStock: variant.stock,
+              note: 'Variant stock updated from product editor',
+            },
+          });
+        }
+      } else {
+        const created = await client.productVariant.create({
+          data: {
+            ...(variant.id ? { id: variant.id } : {}),
+            productId,
+            ...data,
+          },
+        });
+        retainedIds.add(created.id);
+        if (variant.stock > 0) {
+          await client.inventoryMovement.create({
+            data: {
+              type: 'INITIAL_STOCK',
+              productId,
+              variantId: created.id,
+              quantity: variant.stock,
+              unitCost: variant.purchaseCost ?? 0,
+              previousStock: 0,
+              newStock: variant.stock,
+              note: 'Variant created with initial stock',
+            },
+          });
+        }
+      }
+    }
+
+    if (preserveExisting) {
+      const staleIds = existing
+        .filter((item: any) => !retainedIds.has(item.id))
+        .map((item: any) => item.id);
+      if (staleIds.length) {
+        await client.productVariant.updateMany({
+          where: { id: { in: staleIds } },
+          data: { isActive: false },
+        });
+      }
     }
   }
 
@@ -319,7 +394,7 @@ export class ProductsService {
           ),
         },
       });
-      await this.createVariants(tx, product.id, input);
+      await this.syncVariants(tx, product.id, input);
       if (input.stock > 0) {
         await tx.inventoryMovement.create({
           data: {
@@ -333,24 +408,6 @@ export class ProductsService {
           },
         });
       }
-      const variants = await tx.productVariant.findMany({
-        where: { productId: product.id },
-      });
-      for (const variant of variants) {
-        if (variant.stock <= 0) continue;
-        await tx.inventoryMovement.create({
-          data: {
-            type: 'INITIAL_STOCK',
-            productId: product.id,
-            variantId: variant.id,
-            quantity: variant.stock,
-            unitCost: variant.purchaseCost,
-            previousStock: 0,
-            newStock: variant.stock,
-            note: 'Variant created with initial stock',
-          },
-        });
-      }
       const created = await tx.product.findUniqueOrThrow({
         where: { id: product.id },
         include: productInclude,
@@ -360,10 +417,21 @@ export class ProductsService {
   }
 
   async update(id: string, input: ProductInput) {
-    await this.findOne(id, true);
+    const existingProduct = await this.prisma.product.findUnique({
+      where: { id },
+      select: { id: true, stock: true, reservedStock: true },
+    });
+    if (!existingProduct) throw new NotFoundException('পণ্যটি পাওয়া যায়নি');
+    if (input.stock < existingProduct.reservedStock) {
+      throw new ConflictException(
+        `কমপক্ষে ${existingProduct.reservedStock} on-hand stock রাখতে হবে; এগুলো order-এর জন্য reserved`,
+      );
+    }
     const { category, journeys } = await this.relationalData(input);
     return this.prisma.$transaction(async (tx) => {
-      await tx.productVariant.deleteMany({ where: { productId: id } });
+      await tx.productVariantValue.deleteMany({
+        where: { variant: { productId: id } },
+      });
       await tx.productAttribute.deleteMany({ where: { productId: id } });
       await tx.productImage.deleteMany({ where: { productId: id } });
       await tx.productIncludedItem.deleteMany({ where: { productId: id } });
@@ -379,7 +447,20 @@ export class ProductsService {
           ),
         },
       });
-      await this.createVariants(tx, id, input);
+      if (existingProduct.stock !== input.stock) {
+        await tx.inventoryMovement.create({
+          data: {
+            type: 'ADJUSTMENT',
+            productId: id,
+            quantity: input.stock - existingProduct.stock,
+            unitCost: input.purchaseCost ?? 0,
+            previousStock: existingProduct.stock,
+            newStock: input.stock,
+            note: 'Product stock updated from product editor',
+          },
+        });
+      }
+      await this.syncVariants(tx, id, input, true);
       const product = await tx.product.findUniqueOrThrow({
         where: { id },
         include: productInclude,

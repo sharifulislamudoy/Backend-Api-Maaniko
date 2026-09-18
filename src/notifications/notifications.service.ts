@@ -1,16 +1,24 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
+  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OrderStatus, PushNotificationType } from '@prisma/client';
+import {
+  OrderStatus,
+  Prisma,
+  PushCampaignStatus,
+  PushNotificationType,
+} from '@prisma/client';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getMessaging, type MulticastMessage } from 'firebase-admin/messaging';
 import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
+  CreatePushCampaignInput,
   OrderStatusPushInput,
   PushIdentity,
   RegisterPushDeviceInput,
@@ -343,67 +351,177 @@ export class NotificationsService {
   }
 
   async sendOffer(input: SendOfferInput) {
+    const campaign = await this.createDraft(input);
+    return this.sendCampaign(campaign.id);
+  }
+
+  private campaignData(
+    input: CreatePushCampaignInput,
+    type: PushNotificationType = PushNotificationType.OFFER,
+  ) {
     const title = this.clean(input.title, 100);
     const body = this.clean(input.body, 240);
-    const link = this.clean(input.link, 500) || '/';
+    if (!title || !body) {
+      throw new BadRequestException('Title এবং message প্রয়োজন');
+    }
+    return {
+      type,
+      title,
+      body,
+      link: this.clean(input.link, 500) || '/',
+      imageUrl: this.clean(input.imageUrl, 1000) || null,
+      sourceKey: this.clean(input.sourceKey, 240) || null,
+    };
+  }
+
+  async createDraft(
+    input: CreatePushCampaignInput,
+    type: PushNotificationType = PushNotificationType.OFFER,
+  ) {
+    return this.prisma.pushCampaign.create({
+      data: this.campaignData(input, type),
+    });
+  }
+
+  async deleteDraft(idInput: string) {
+    const id = this.clean(idInput, 180);
+    const deleted = await this.prisma.pushCampaign.deleteMany({
+      where: { id, status: PushCampaignStatus.DRAFT },
+    });
+    if (deleted.count !== 1) {
+      throw new NotFoundException('Draft notification পাওয়া যায়নি');
+    }
+    return { success: true };
+  }
+
+  async sendCampaign(idInput: string) {
+    const id = this.clean(idInput, 180);
+    const claimed = await this.prisma.pushCampaign.updateMany({
+      where: {
+        id,
+        status: {
+          in: [PushCampaignStatus.DRAFT, PushCampaignStatus.FAILED],
+        },
+      },
+      data: { status: PushCampaignStatus.SENDING },
+    });
+    if (claimed.count !== 1) {
+      const current = await this.prisma.pushCampaign.findUnique({
+        where: { id },
+      });
+      if (!current) throw new NotFoundException('Notification পাওয়া যায়নি');
+      throw new ConflictException(
+        current.status === PushCampaignStatus.SENDING
+          ? 'Notification ইতোমধ্যে send হচ্ছে'
+          : 'Notification ইতোমধ্যে send করা হয়েছে',
+      );
+    }
+
+    const campaign = await this.prisma.pushCampaign.findUniqueOrThrow({
+      where: { id },
+    });
+    const title = campaign.title;
+    const body = campaign.body;
+    const link = campaign.link || '/';
     const publicSiteUrl = (
       this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:3000'
     ).replace(/\/$/, '');
     const webLink = /^https?:\/\//i.test(link)
       ? link
       : `${publicSiteUrl}${link.startsWith('/') ? link : `/${link}`}`;
-    const imageUrl = this.clean(input.imageUrl, 1000) || undefined;
-    if (!title || !body) {
-      throw new BadRequestException('Title এবং message প্রয়োজন');
-    }
+    const imageUrl = campaign.imageUrl || undefined;
 
     const devices = await this.prisma.pushDevice.findMany({
       where: { enabled: true, allowOffers: true },
       select: { token: true },
     });
 
-    const result = devices.length
-      ? await this.send(
-          devices.map((device) => device.token),
-          {
-            notification: { title, body, imageUrl },
-            data: { type: 'OFFER', link },
-            webpush: {
-              fcmOptions: { link: webLink },
-              notification: {
-                icon: '/icons/pwa-192.png',
-                badge: '/icons/pwa-192.png',
-                image: imageUrl,
-                tag: `offer-${Date.now()}`,
+    try {
+      const result = devices.length
+        ? await this.send(
+            devices.map((device) => device.token),
+            {
+              notification: { title, body, imageUrl },
+              data: { type: campaign.type, link },
+              webpush: {
+                fcmOptions: { link: webLink },
+                notification: {
+                  icon: '/icons/pwa-192.png',
+                  badge: '/icons/pwa-192.png',
+                  image: imageUrl,
+                  tag: `campaign-${campaign.id}`,
+                },
               },
             },
-          },
-        )
-      : { recipientCount: 0, sentCount: 0, failureCount: 0 };
+          )
+        : { recipientCount: 0, sentCount: 0, failureCount: 0 };
 
-    const [campaign] = await this.prisma.$transaction([
-      this.prisma.pushCampaign.create({
-        data: {
-          type: PushNotificationType.OFFER,
-          title,
-          body,
-          link,
-          imageUrl,
-          ...result,
+      const status =
+        result.failureCount === 0
+          ? PushCampaignStatus.SENT
+          : result.sentCount > 0
+            ? PushCampaignStatus.PARTIAL
+            : PushCampaignStatus.FAILED;
+      const [saved] = await this.prisma.$transaction([
+        this.prisma.pushCampaign.update({
+          where: { id: campaign.id },
+          data: { ...result, status, sentAt: new Date() },
+        }),
+        this.prisma.pushInboxItem.create({
+          data: {
+            type: campaign.type,
+            title,
+            body,
+            link,
+            imageUrl,
+            isGlobal: true,
+          },
+        }),
+      ]);
+      return { campaign: saved, ...result };
+    } catch (error) {
+      await this.prisma.pushCampaign.update({
+        where: { id: campaign.id },
+        data: { status: PushCampaignStatus.FAILED },
+      });
+      throw error;
+    }
+  }
+
+  async sendBannerPublished(input: {
+    id: string;
+    title?: string | null;
+    eyebrow?: string | null;
+    description?: string | null;
+    desktopImage: string;
+    link?: string | null;
+  }) {
+    try {
+      const campaign = await this.createDraft(
+        {
+          title: input.title || input.eyebrow || 'Maaniko-তে নতুন আয়োজন',
+          body:
+            input.description ||
+            'নতুন ব্যানারটি দেখুন এবং আপনার প্রয়োজনীয় পণ্য বেছে নিন।',
+          imageUrl: input.desktopImage,
+          link: input.link || '/',
+          sourceKey: `banner-published:${input.id}`,
         },
-      }),
-      this.prisma.pushInboxItem.create({
-        data: {
-          type: PushNotificationType.OFFER,
-          title,
-          body,
-          link,
-          imageUrl,
-          isGlobal: true,
-        },
-      }),
-    ]);
-    return { campaign, ...result };
+        PushNotificationType.BANNER,
+      );
+      return this.sendCampaign(campaign.id);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return { duplicate: true, skipped: true };
+      }
+      this.logger.error(
+        `Banner push failed: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+      return { failed: true };
+    }
   }
 
   async sendOrderStatus(input: OrderStatusPushInput) {
@@ -482,7 +600,7 @@ export class NotificationsService {
       }),
       this.prisma.pushCampaign.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 20,
+        take: 50,
       }),
     ]);
     return { activeDevices, offerDevices, campaigns };

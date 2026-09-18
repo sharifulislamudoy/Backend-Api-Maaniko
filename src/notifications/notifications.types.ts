@@ -19,6 +19,10 @@ export type SendOfferInput = {
   imageUrl?: string;
 };
 
+export type CreatePushCampaignInput = SendOfferInput & {
+  sourceKey?: string;
+};
+
 export type OrderStatusPushInput = {
   customerId: string;
   orderNumber: string;

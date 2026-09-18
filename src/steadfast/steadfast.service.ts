@@ -352,6 +352,15 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.order.updateMany({
+        where: { id: order.id, status: order.status },
+        data: { status },
+      });
+      if (claimed.count !== 1) {
+        throw new BadRequestException(
+          'Order status ইতোমধ্যে পরিবর্তিত হয়েছে; refresh করে আবার চেষ্টা করুন',
+        );
+      }
       if (status === OrderStatus.CANCELLED) {
         await this.inventory.releaseOrder(tx, order);
       }
@@ -462,12 +471,20 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
             });
           }
         } else {
-          if (statusChanged && nextStatus === OrderStatus.DELIVERED) {
+          let applyStatusChange = statusChanged;
+          if (statusChanged) {
+            const claimed = await tx.order.updateMany({
+              where: { id: order.id, status: order.status },
+              data: { status: nextStatus },
+            });
+            applyStatusChange = claimed.count === 1;
+          }
+          if (applyStatusChange && nextStatus === OrderStatus.DELIVERED) {
             await this.inventory.deliverOrder(tx, order);
             data.deliveredAt = new Date();
           }
-          if (statusChanged) data.status = nextStatus;
-          if (rawChanged || statusChanged) {
+          if (applyStatusChange) data.status = nextStatus;
+          if (rawChanged || applyStatusChange) {
             data.history = {
               create: {
                 status: statusChanged ? nextStatus : order.status,
@@ -476,7 +493,7 @@ export class SteadfastService implements OnModuleInit, OnModuleDestroy {
             };
           }
           await tx.order.update({ where: { id: order.id }, data });
-          if (statusChanged && nextStatus === OrderStatus.DELIVERED) {
+          if (applyStatusChange && nextStatus === OrderStatus.DELIVERED) {
             await this.finance.recognizeDeliveredOrder(tx, order.id);
           }
         }

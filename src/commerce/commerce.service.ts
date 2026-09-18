@@ -2934,6 +2934,15 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.order.updateMany({
+        where: { id: order.id, status: order.status },
+        data: { status: input.status },
+      });
+      if (claimed.count !== 1) {
+        throw new ConflictException(
+          'Order status ইতোমধ্যে পরিবর্তিত হয়েছে; refresh করে আবার চেষ্টা করুন',
+        );
+      }
       if (input.status === OrderStatus.CANCELLED) {
         await this.inventory.releaseOrder(tx, order);
       }
@@ -3115,7 +3124,17 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           data: {
             subtotal,
             deliveryCharge,
-            total: this.money(subtotal + deliveryCharge),
+            total: this.money(
+              Math.max(
+                0,
+                subtotal +
+                  deliveryCharge -
+                  Math.min(
+                    this.asNumber(order.rewardDiscount),
+                    subtotal + deliveryCharge,
+                  ),
+              ),
+            ),
             ...(input.courierCost !== undefined
               ? { courierCost: Math.max(0, Number(input.courierCost)) }
               : {}),

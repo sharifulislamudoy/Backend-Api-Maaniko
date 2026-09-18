@@ -279,6 +279,14 @@ export class FinanceService {
       { name: string; quantity: number; revenue: number; profit: number }
     >();
     for (const order of delivered) {
+      const merchandiseRevenue = Math.max(
+        0,
+        this.number(order.subtotal) - this.number(order.rewardDiscount),
+      );
+      const merchandiseFactor =
+        this.number(order.subtotal) > 0
+          ? merchandiseRevenue / this.number(order.subtotal)
+          : 0;
       for (const item of order.items) {
         const key = item.productId ?? item.comboId ?? item.nameSnapshot;
         const current = productMap.get(key) ?? {
@@ -287,7 +295,9 @@ export class FinanceService {
           revenue: 0,
           profit: 0,
         };
-        const revenue = this.number(item.lineTotal);
+        const revenue = this.money(
+          this.number(item.lineTotal) * merchandiseFactor,
+        );
         const cost =
           (this.number(item.purchaseCostSnapshot) +
             this.number(item.packagingCostSnapshot)) *
