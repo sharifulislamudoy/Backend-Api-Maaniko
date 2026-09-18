@@ -14,7 +14,6 @@ import type {
   SubmitOrderReviewInput,
 } from './reviews.types';
 
-const REVIEW_ELIGIBLE_AFTER_MS = 24 * 60 * 60 * 1000;
 const REMIND_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_DISMISSALS = 2;
 
@@ -63,12 +62,11 @@ export class ReviewsService {
     if (!customerId) return { prompt: null };
 
     const now = new Date();
-    const deliveredBefore = new Date(now.getTime() - REVIEW_ELIGIBLE_AFTER_MS);
     const order = await this.prisma.order.findFirst({
       where: {
         customerId,
         status: OrderStatus.DELIVERED,
-        deliveredAt: { not: null, lte: deliveredBefore },
+        deliveredAt: { not: null },
         review: null,
         reviewPromptOptOut: false,
         OR: [
@@ -307,5 +305,162 @@ export class ReviewsService {
       include: { order: { select: { customerName: true } } },
     });
     return { reviews: reviews.map((review) => this.serializePublicReview(review)) };
+  }
+
+  async adminList(input: {
+    search?: string;
+    rating?: string;
+    target?: string;
+    page?: string;
+    limit?: string;
+  }) {
+    const search = this.clean(input.search, 100);
+    const ratingNumber = Number(input.rating);
+    const rating =
+      Number.isInteger(ratingNumber) && ratingNumber >= 1 && ratingNumber <= 5
+        ? ratingNumber
+        : undefined;
+    const target = this.clean(input.target, 20).toUpperCase();
+    const page = Math.max(1, Number.parseInt(input.page ?? '1', 10) || 1);
+    const limit = Math.min(
+      50,
+      Math.max(10, Number.parseInt(input.limit ?? '20', 10) || 20),
+    );
+
+    const targetWhere: Prisma.OrderReviewWhereInput =
+      target === 'PRODUCT'
+        ? { targetProductId: { not: null } }
+        : target === 'COMBO'
+          ? { targetComboId: { not: null } }
+          : target === 'OVERALL'
+            ? { targetProductId: null, targetComboId: null }
+            : {};
+
+    const where: Prisma.OrderReviewWhereInput = {
+      ...targetWhere,
+      ...(rating ? { overallRating: rating } : {}),
+      ...(search
+        ? {
+            OR: [
+              { comment: { contains: search, mode: 'insensitive' } },
+              {
+                order: {
+                  is: {
+                    orderNumber: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              },
+              {
+                order: {
+                  is: {
+                    customerName: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              },
+              {
+                selectedOrderItem: {
+                  is: {
+                    nameSnapshot: { contains: search, mode: 'insensitive' },
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+
+    const [reviews, total, aggregate, productCount, comboCount, distribution] =
+      await Promise.all([
+        this.prisma.orderReview.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            order: {
+              select: {
+                id: true,
+                orderNumber: true,
+                customerName: true,
+                phone: true,
+                deliveredAt: true,
+              },
+            },
+            selectedOrderItem: {
+              select: { id: true, nameSnapshot: true, imageSnapshot: true },
+            },
+            targetProduct: { select: { id: true, name: true, slug: true } },
+            targetCombo: { select: { id: true, name: true, slug: true } },
+          },
+        }),
+        this.prisma.orderReview.count({ where }),
+        this.prisma.orderReview.aggregate({
+          _count: { _all: true },
+          _avg: { overallRating: true },
+        }),
+        this.prisma.orderReview.count({
+          where: { targetProductId: { not: null } },
+        }),
+        this.prisma.orderReview.count({
+          where: { targetComboId: { not: null } },
+        }),
+        this.prisma.orderReview.groupBy({
+          by: ['overallRating'],
+          _count: { _all: true },
+          orderBy: { overallRating: 'desc' },
+        }),
+      ]);
+
+    const allTotal = aggregate._count._all;
+    return {
+      summary: {
+        total: allTotal,
+        averageRating: aggregate._avg.overallRating ?? 0,
+        productReviews: productCount,
+        comboReviews: comboCount,
+        overallReviews: Math.max(0, allTotal - productCount - comboCount),
+        distribution: Object.fromEntries(
+          [1, 2, 3, 4, 5].map((value) => [
+            value,
+            distribution.find((item) => item.overallRating === value)?._count
+              ._all ?? 0,
+          ]),
+        ),
+      },
+      data: reviews.map((review) => ({
+        id: review.id,
+        rating: review.overallRating,
+        comment: review.comment,
+        isVerified: review.isVerified,
+        createdAt: review.createdAt,
+        targetType: review.targetProductId
+          ? 'PRODUCT'
+          : review.targetComboId
+            ? 'COMBO'
+            : 'OVERALL',
+        target: review.targetProduct
+          ? {
+              id: review.targetProduct.id,
+              name: review.targetProduct.name,
+              slug: review.targetProduct.slug,
+              image: review.selectedOrderItem?.imageSnapshot ?? null,
+            }
+          : review.targetCombo
+            ? {
+                id: review.targetCombo.id,
+                name: review.targetCombo.name,
+                slug: review.targetCombo.slug,
+                image: review.selectedOrderItem?.imageSnapshot ?? null,
+              }
+            : null,
+        order: review.order,
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    };
   }
 }

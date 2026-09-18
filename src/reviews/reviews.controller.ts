@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Role } from '@prisma/client';
+import { Roles, RolesGuard } from '../auth/roles.guard';
 import { ReviewsService } from './reviews.service';
 import type {
   DismissReviewPromptInput,
@@ -64,5 +76,23 @@ export class ReviewsController {
     @Query('limit') limit?: string,
   ) {
     return this.reviews.forCombo(comboId, limit);
+  }
+}
+
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles(Role.ADMIN, Role.SUPER_ADMIN)
+@Controller('commerce/admin/reviews')
+export class AdminReviewsController {
+  constructor(private readonly reviews: ReviewsService) {}
+
+  @Get()
+  list(
+    @Query('search') search?: string,
+    @Query('rating') rating?: string,
+    @Query('target') target?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.reviews.adminList({ search, rating, target, page, limit });
   }
 }
