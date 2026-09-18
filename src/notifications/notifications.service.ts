@@ -383,6 +383,44 @@ export class NotificationsService {
     });
   }
 
+  async createTemplate(input: CreatePushCampaignInput) {
+    return this.createDraft(input, PushNotificationType.OFFER);
+  }
+
+  async sendTemplate(idInput: string) {
+    const id = this.clean(idInput, 180);
+    const template = await this.prisma.pushCampaign.findFirst({
+      where: { id, status: PushCampaignStatus.DRAFT },
+    });
+    if (!template) {
+      throw new NotFoundException('Saved notification পাওয়া যায়নি');
+    }
+
+    // A saved notification is never consumed. Every click creates a fresh
+    // campaign so the template remains available and each send has history.
+    const campaign = await this.prisma.pushCampaign.create({
+      data: {
+        type: template.type,
+        title: template.title,
+        body: template.body,
+        link: template.link,
+        imageUrl: template.imageUrl,
+      },
+    });
+    return this.sendCampaign(campaign.id);
+  }
+
+  async deleteTemplate(idInput: string) {
+    const id = this.clean(idInput, 180);
+    const deleted = await this.prisma.pushCampaign.deleteMany({
+      where: { id, status: PushCampaignStatus.DRAFT },
+    });
+    if (deleted.count !== 1) {
+      throw new NotFoundException('Saved notification পাওয়া যায়নি');
+    }
+    return { success: true };
+  }
+
   async deleteDraft(idInput: string) {
     const id = this.clean(idInput, 180);
     const deleted = await this.prisma.pushCampaign.deleteMany({
@@ -593,16 +631,22 @@ export class NotificationsService {
   }
 
   async adminOverview() {
-    const [activeDevices, offerDevices, campaigns] = await Promise.all([
-      this.prisma.pushDevice.count({ where: { enabled: true } }),
-      this.prisma.pushDevice.count({
-        where: { enabled: true, allowOffers: true },
-      }),
-      this.prisma.pushCampaign.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 50,
-      }),
-    ]);
-    return { activeDevices, offerDevices, campaigns };
+    const [activeDevices, offerDevices, templates, campaigns] =
+      await Promise.all([
+        this.prisma.pushDevice.count({ where: { enabled: true } }),
+        this.prisma.pushDevice.count({
+          where: { enabled: true, allowOffers: true },
+        }),
+        this.prisma.pushCampaign.findMany({
+          where: { status: PushCampaignStatus.DRAFT },
+          orderBy: { createdAt: 'desc' },
+        }),
+        this.prisma.pushCampaign.findMany({
+          where: { status: { not: PushCampaignStatus.DRAFT } },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+        }),
+      ]);
+    return { activeDevices, offerDevices, templates, campaigns };
   }
 }

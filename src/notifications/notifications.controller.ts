@@ -80,6 +80,21 @@ export class AdminNotificationsController {
     return this.notifications.createDraft(body);
   }
 
+  @Post('templates')
+  createTemplate(@Body() body: CreatePushCampaignInput) {
+    return this.notifications.createTemplate(body);
+  }
+
+  @Post('templates/:id/send')
+  sendTemplate(@Param('id') id: string) {
+    return this.notifications.sendTemplate(id);
+  }
+
+  @Delete('templates/:id')
+  deleteTemplate(@Param('id') id: string) {
+    return this.notifications.deleteTemplate(id);
+  }
+
   @Post('campaigns/:id/send')
   sendCampaign(@Param('id') id: string) {
     return this.notifications.sendCampaign(id);
