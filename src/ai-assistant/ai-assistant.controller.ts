@@ -18,6 +18,7 @@ import {
   AiChatDto,
   AiFeedbackDto,
   AiKnowledgeReviewDto,
+  AiSupportReplyDto,
 } from './ai-assistant.dto';
 
 @Controller('ai-assistant')
@@ -43,6 +44,15 @@ export class AiAssistantController {
     return this.ai.feedback(messageId, input, guestId, customerToken);
   }
 
+  @Get('support/:ticketId')
+  supportStatus(
+    @Param('ticketId') ticketId: string,
+    @Headers('x-maaniko-guest-id') guestId = '',
+    @Headers('x-maaniko-customer-token') customerToken = '',
+  ) {
+    return this.ai.supportStatus(ticketId, guestId, customerToken);
+  }
+
   @Get('admin/analytics')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
@@ -55,6 +65,16 @@ export class AiAssistantController {
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   conversation(@Param('conversationId') conversationId: string) {
     return this.ai.conversation(conversationId);
+  }
+
+  @Patch('admin/support/:ticketId')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  replySupport(
+    @Param('ticketId') ticketId: string,
+    @Body() input: AiSupportReplyDto,
+  ) {
+    return this.ai.replySupport(ticketId, input);
   }
 
   @Patch('admin/knowledge/:knowledgeId')

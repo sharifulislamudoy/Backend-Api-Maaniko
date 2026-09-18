@@ -149,4 +149,42 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       console.error('Telegram order alert পাঠানো যায়নি:', error);
     }
   }
+
+  async sendAiFailureAlert(input: {
+    ticketId: string;
+    conversationId: string;
+    question: string;
+    pagePath?: string | null;
+    reason: string;
+  }) {
+    if (!this.superAdminChatId) {
+      console.warn('TELEGRAM_CHAT_ID সেট করা নেই; AI failure alert পাঠানো হয়নি।');
+      return false;
+    }
+
+    const adminUrl = this.config.get<string>('ADMIN_APP_URL')?.replace(/\/$/, '');
+    const message = [
+      '🚨 Maaniko AI human reply প্রয়োজন',
+      `Ticket: ${input.ticketId}`,
+      `Conversation: ${input.conversationId}`,
+      `Page: ${input.pagePath || '/'}`,
+      '',
+      `Customer: ${input.question.slice(0, 700)}`,
+      '',
+      `Provider: ${input.reason.slice(0, 700)}`,
+      adminUrl ? `Reply: ${adminUrl}/ai-assistant` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    try {
+      await this.bot.telegram.sendMessage(this.superAdminChatId, message, {
+        link_preview_options: { is_disabled: true },
+      });
+      return true;
+    } catch (error) {
+      console.error('Telegram AI failure alert পাঠানো যায়নি:', error);
+      return false;
+    }
+  }
 }

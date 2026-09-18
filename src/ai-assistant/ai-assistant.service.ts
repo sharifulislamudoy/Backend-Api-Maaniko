@@ -1,21 +1,21 @@
 import {
-  BadGatewayException,
   HttpException,
   HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'node:crypto';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { TelegramService } from '../telegram/telegram.service';
 import type {
   AiChatDto,
   AiFeedbackDto,
   AiKnowledgeReviewDto,
+  AiSupportReplyDto,
 } from './ai-assistant.dto';
 
 type GroqResponse = {
@@ -59,11 +59,13 @@ type RecommendationCard = {
 };
 
 const AI_HISTORY_LIMIT = 4;
-const AI_HISTORY_MESSAGE_LENGTH = 300;
-const AI_PRODUCT_LIMIT = 6;
-const AI_COMBO_LIMIT = 4;
-const AI_KNOWLEDGE_LIMIT = 2;
-const AI_MAX_COMPLETION_TOKENS = 500;
+const AI_HISTORY_MESSAGE_LENGTH = 220;
+const AI_PRODUCT_LIMIT = 4;
+const AI_COMBO_LIMIT = 2;
+const AI_KNOWLEDGE_LIMIT = 1;
+const AI_MAX_COMPLETION_TOKENS = 350;
+const PROVIDER_TIMEOUT_MS = 18_000;
+const PROVIDER_COOLDOWN_MS = 60_000;
 
 const TOPICS: {
   key: string;
@@ -312,10 +314,13 @@ const DISCOVERY_WORDS = [
 @Injectable()
 export class AiAssistantService {
   private readonly logger = new Logger(AiAssistantService.name);
+  private readonly providerCooldown = new Map<string, number>();
+  private providerCursor = 0;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly telegram: TelegramService,
   ) {}
 
   private hash(value: string) {
@@ -1049,10 +1054,10 @@ export class AiAssistantService {
         price: product.price,
         compareAtPrice: product.compareAtPrice,
         available: product.available,
-        journeys: product.journeys.slice(0, 3),
-        attributes: product.attributes.slice(0, 4).map((attribute) => ({
+        journeys: product.journeys.slice(0, 2),
+        attributes: product.attributes.slice(0, 2).map((attribute) => ({
           name: attribute.name,
-          values: attribute.values.slice(0, 5),
+          values: attribute.values.slice(0, 3),
         })),
       })),
       solutionBoxes: catalog.solutionBoxes.map((combo) => ({
@@ -1064,7 +1069,7 @@ export class AiAssistantService {
         price: combo.price,
         compareAtPrice: combo.compareAtPrice,
         available: combo.available,
-        includedProducts: combo.includedProducts.slice(0, 8),
+        includedProducts: combo.includedProducts.slice(0, 5),
       })),
       customSolutionBox: catalog.customSolutionBox,
     };
@@ -1079,14 +1084,14 @@ export class AiAssistantService {
       journey: customer.journey,
       interests: this.compactText(JSON.stringify(customer.interests), 240),
       budget: customer.budget,
-      recentOrders: customer.recentOrders.slice(0, 3).map((order) => ({
+      recentOrders: customer.recentOrders.slice(0, 2).map((order) => ({
         ...order,
-        products: order.products.slice(0, 6),
+        products: order.products.slice(0, 4),
       })),
-      cart: customer.cart.slice(0, 8),
-      wishlist: customer.wishlist.slice(0, 8),
-      recentActivities: customer.recentActivities.slice(0, 6),
-      activeRequests: customer.activeRequests.slice(0, 4),
+      cart: customer.cart.slice(0, 5),
+      wishlist: customer.wishlist.slice(0, 5),
+      recentActivities: customer.recentActivities.slice(0, 3),
+      activeRequests: customer.activeRequests.slice(0, 2),
     };
   }
 
@@ -1252,28 +1257,179 @@ Rules:
     );
   }
 
-  async chat(input: AiChatDto, guestId: string, customerToken: string) {
-    const apiKey = this.config.get<string>('GROQ_API_KEY')?.trim();
+  private configList(name: string) {
+    return (this.config.get<string>(name) ?? '')
+      .split(/[\n,;]/)
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
 
-    if (!apiKey) {
-      throw new ServiceUnavailableException(
-        'GROQ_API_KEY backend environment-এ সেট করা নেই।',
-      );
-    }
+  private groqApiKeys() {
+    const numberedKeys = Array.from({ length: 8 }, (_, index) =>
+      this.config.get<string>(`GROQ_API_KEY_${index + 2}`)?.trim(),
+    );
+    const values = [
+      ...this.configList('GROQ_API_KEYS'),
+      this.config.get<string>('GROQ_API_KEY')?.trim(),
+      ...numberedKeys,
+    ].filter((value): value is string => Boolean(value));
 
-    if (apiKey === 'gsk_your_new_key_here' || apiKey.includes('YOUR_NEW_KEY')) {
-      throw new ServiceUnavailableException(
-        'সঠিক Groq API key backend environment-এ সেট করুন।',
-      );
-    }
+    return Array.from(new Set(values)).filter(
+      (value) =>
+        value !== 'gsk_your_new_key_here' && !value.includes('YOUR_NEW_KEY'),
+    );
+  }
 
-    const model =
-      this.config.get<string>('GROQ_MODEL')?.trim() || 'openai/gpt-oss-20b';
+  private groqModels() {
+    return Array.from(
+      new Set([
+        ...this.configList('GROQ_MODELS'),
+        this.config.get<string>('GROQ_MODEL')?.trim(),
+        'openai/gpt-oss-20b',
+        'llama-3.1-8b-instant',
+        'llama-3.3-70b-versatile',
+      ].filter((value): value is string => Boolean(value))),
+    );
+  }
 
+  private async callGroq(messages: Array<{ role: string; content: string }>) {
+    const keys = this.groqApiKeys();
+    const models = this.groqModels();
     const apiUrl =
       this.config.get<string>('GROQ_API_URL')?.trim() ||
       'https://api.groq.com/openai/v1/chat/completions';
+    const maxAttempts = Math.min(
+      Math.max(Number(this.config.get<string>('GROQ_MAX_ATTEMPTS')) || 4, 1),
+      8,
+    );
+    const pairs = keys.flatMap((apiKey, keyIndex) =>
+      models.map((model) => ({ apiKey, keyIndex, model })),
+    );
+    const failures: string[] = [];
 
+    if (!pairs.length) {
+      return { data: null, model: 'local-fallback', failures: ['NO_API_KEY'] };
+    }
+
+    const start = this.providerCursor++ % pairs.length;
+    let attempts = 0;
+
+    for (let offset = 0; offset < pairs.length && attempts < maxAttempts; offset += 1) {
+      const pair = pairs[(start + offset) % pairs.length];
+      const providerId = `${pair.keyIndex}:${pair.model}`;
+      if ((this.providerCooldown.get(providerId) ?? 0) > Date.now()) continue;
+      attempts += 1;
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${pair.apiKey}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            model: pair.model,
+            temperature: 0.25,
+            max_completion_tokens: AI_MAX_COMPLETION_TOKENS,
+            response_format: { type: 'json_object' },
+            messages,
+          }),
+          signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
+        });
+        const responseText = await response.text();
+        let data: GroqResponse | null = null;
+        try {
+          data = responseText ? (JSON.parse(responseText) as GroqResponse) : null;
+        } catch {
+          data = null;
+        }
+
+        const rawAnswer = data?.choices?.[0]?.message?.content?.trim();
+        if (response.ok && rawAnswer) {
+          this.providerCooldown.delete(providerId);
+          return { data, model: pair.model, failures };
+        }
+
+        const reason = this.groqErrorMessage(data, responseText);
+        failures.push(`key-${pair.keyIndex + 1}/${pair.model}: ${response.status} ${reason}`);
+        const retryAfter = Number(response.headers.get('retry-after')) || 0;
+        const cooldown =
+          response.status === 429
+            ? Math.max(retryAfter * 1000, PROVIDER_COOLDOWN_MS)
+            : response.status === 401 || response.status === 403 || response.status === 400
+              ? 5 * 60_000
+              : PROVIDER_COOLDOWN_MS;
+        this.providerCooldown.set(providerId, Date.now() + cooldown);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : 'network error';
+        failures.push(`key-${pair.keyIndex + 1}/${pair.model}: ${reason}`);
+        this.providerCooldown.set(providerId, Date.now() + PROVIDER_COOLDOWN_MS);
+      }
+    }
+
+    return { data: null, model: 'local-fallback', failures };
+  }
+
+  private async createSupportTicket(input: {
+    conversationId: string;
+    visitorHash: string;
+    question: string;
+    pagePath?: string;
+    failureReason: string;
+  }) {
+    try {
+      const previous = await this.prisma.aiSupportTicket.findUnique({
+        where: { conversationId: input.conversationId },
+        select: { lastNotifiedAt: true },
+      });
+      const ticket = await this.prisma.aiSupportTicket.upsert({
+        where: { conversationId: input.conversationId },
+        create: {
+          conversationId: input.conversationId,
+          visitorHash: input.visitorHash,
+          question: this.sanitizeForStorage(input.question),
+          pagePath: input.pagePath?.slice(0, 300),
+          failureReason: input.failureReason.slice(0, 4000),
+        },
+        update: {
+          visitorHash: input.visitorHash,
+          question: this.sanitizeForStorage(input.question),
+          pagePath: input.pagePath?.slice(0, 300),
+          failureReason: input.failureReason.slice(0, 4000),
+          status: 'PENDING',
+          adminReply: null,
+          repliedBy: null,
+          repliedAt: null,
+        },
+      });
+      const shouldNotify =
+        !previous?.lastNotifiedAt ||
+        previous.lastNotifiedAt.getTime() < Date.now() - 10 * 60_000;
+      if (shouldNotify) {
+        const sent = await this.telegram.sendAiFailureAlert({
+          ticketId: ticket.id,
+          conversationId: ticket.conversationId,
+          question: ticket.question,
+          pagePath: ticket.pagePath,
+          reason: ticket.failureReason,
+        });
+        if (sent) {
+          await this.prisma.aiSupportTicket.update({
+            where: { id: ticket.id },
+            data: { lastNotifiedAt: new Date() },
+          });
+        }
+      }
+      return ticket.id;
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'unknown error';
+      this.logger.error(`AI support escalation failed: ${reason}`);
+      return null;
+    }
+  }
+
+  async chat(input: AiChatDto, guestId: string, customerToken: string) {
     const visitorHash = this.hash(guestId || customerToken || 'anonymous');
     const conversationId = /^[a-zA-Z0-9_-]{8,100}$/.test(
       input.conversationId ?? '',
@@ -1319,148 +1475,48 @@ Rules:
     ]);
 
     const started = Date.now();
+    const provider = await this.callGroq([
+      { role: 'system', content: this.getSystemPrompt() },
+      {
+        role: 'system',
+        content: [
+          `STORE_CONTEXT=${JSON.stringify(this.modelCatalogContext(catalog))}`,
+          `CUSTOMER_CONTEXT=${JSON.stringify(this.modelCustomerContext(customer))}`,
+          `APPROVED_KNOWLEDGE=${JSON.stringify(this.modelKnowledgeContext(knowledge))}`,
+          `CURRENT_PAGE=${input.pagePath ?? '/'}`,
+          `DISCOVERY_STATE=${JSON.stringify({ discoveryRequest, userTurnCount })}`,
+          discoveryRequest && userTurnCount === 1
+            ? 'এই broad need-based request-এ এখন recommendation না দিয়ে একটি follow-up question করতেই হবে।'
+            : 'ইতিমধ্যে পাওয়া তথ্য বিচার করে প্রয়োজন পরিষ্কার না হলে পরবর্তী একটি follow-up question করুন।',
+        ].join('\n'),
+      },
+      ...history,
+      { role: 'user', content: input.message },
+    ]);
+    const usedLocalFallback = !provider.data;
+    const model = provider.model;
+    const fallback = usedLocalFallback
+      ? this.localFallbackResponse(discoveryRequest, userTurnCount, catalog)
+      : null;
+    const data: GroqResponse =
+      provider.data ?? {
+        choices: [{ message: { content: JSON.stringify(fallback) } }],
+        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+      };
+    const rawAnswer = data.choices?.[0]?.message?.content?.trim() ||
+      JSON.stringify(this.localFallbackResponse(discoveryRequest, userTurnCount, catalog));
+    let supportTicketId: string | null = null;
 
-    let response: Response;
-
-    try {
-      response = await fetch(apiUrl, {
-        method: 'POST',
-
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-
-        body: JSON.stringify({
-          model,
-          temperature: 0.25,
-          max_completion_tokens: AI_MAX_COMPLETION_TOKENS,
-          response_format: { type: 'json_object' },
-
-          messages: [
-            {
-              role: 'system',
-              content: this.getSystemPrompt(),
-            },
-            {
-              role: 'system',
-              content: [
-                `STORE_CONTEXT=${JSON.stringify(this.modelCatalogContext(catalog))}`,
-                `CUSTOMER_CONTEXT=${JSON.stringify(this.modelCustomerContext(customer))}`,
-                `APPROVED_KNOWLEDGE=${JSON.stringify(this.modelKnowledgeContext(knowledge))}`,
-                `CURRENT_PAGE=${input.pagePath ?? '/'}`,
-                `DISCOVERY_STATE=${JSON.stringify({ discoveryRequest, userTurnCount })}`,
-                discoveryRequest && userTurnCount === 1
-                  ? 'এই broad need-based request-এ এখন recommendation না দিয়ে একটি follow-up question করতেই হবে।'
-                  : 'ইতিমধ্যে পাওয়া তথ্য বিচার করে প্রয়োজন পরিষ্কার না হলে পরবর্তী একটি follow-up question করুন।',
-              ].join('\n'),
-            },
-            ...history,
-            {
-              role: 'user',
-              content: input.message,
-            },
-          ],
-        }),
-
-        signal: AbortSignal.timeout(30_000),
+    if (usedLocalFallback) {
+      const failureReason = provider.failures.join(' | ') || 'Groq unavailable';
+      this.logger.error(`All Groq providers failed: ${failureReason}`);
+      supportTicketId = await this.createSupportTicket({
+        conversationId,
+        visitorHash,
+        question: input.message,
+        pagePath: input.pagePath,
+        failureReason,
       });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Unknown network error';
-
-      this.logger.error(`Groq network request failed: ${message}`);
-
-      throw new BadGatewayException(
-        'Groq AI service-এর সাথে যোগাযোগ করা যায়নি। Backend internet connection পরীক্ষা করুন।',
-      );
-    }
-
-    const responseText = await response.text();
-
-    let data: GroqResponse | null = null;
-
-    try {
-      data = responseText ? (JSON.parse(responseText) as GroqResponse) : null;
-    } catch {
-      data = null;
-    }
-
-    let usedLocalFallback = false;
-
-    if (!response.ok) {
-      const groqError = this.groqErrorMessage(data, responseText);
-
-      /*
-       * API key terminal-এ log করা হচ্ছে না।
-       * শুধু Groq-এর status ও error message দেখা যাবে।
-       */
-      if (response.status === 429) {
-        this.logger.warn(
-          `Groq rate limit reached; local fallback used: ${groqError}`,
-        );
-        const fallback = this.localFallbackResponse(
-          discoveryRequest,
-          userTurnCount,
-          catalog,
-        );
-        data = {
-          choices: [{ message: { content: JSON.stringify(fallback) } }],
-          usage: {
-            prompt_tokens: 0,
-            completion_tokens: 0,
-            total_tokens: 0,
-          },
-        };
-        usedLocalFallback = true;
-      } else {
-        this.logger.error(`Groq API error ${response.status}: ${groqError}`);
-      }
-
-      if (response.status === 401 || response.status === 403) {
-        throw new ServiceUnavailableException(
-          'Groq API key সঠিক নয় অথবা key-এর permission নেই।',
-        );
-      }
-
-      if (!usedLocalFallback && response.status === 400) {
-        throw new ServiceUnavailableException(
-          `Groq request গ্রহণ করেনি। GROQ_MODEL পরীক্ষা করুন। বর্তমান model: ${model}`,
-        );
-      }
-
-      if (!usedLocalFallback && response.status >= 500) {
-        throw new BadGatewayException(
-          'Groq AI service সাময়িকভাবে unavailable। একটু পরে চেষ্টা করুন।',
-        );
-      }
-
-      if (!usedLocalFallback) {
-        throw new BadGatewayException(
-          'Groq AI service থেকে সঠিক response পাওয়া যায়নি।',
-        );
-      }
-    }
-
-    if (!data) {
-      this.logger.error('Groq returned a non-JSON successful response.');
-
-      throw new BadGatewayException(
-        'Groq থেকে সঠিক JSON response পাওয়া যায়নি।',
-      );
-    }
-
-    const rawAnswer = data.choices?.[0]?.message?.content?.trim();
-
-    if (!rawAnswer) {
-      this.logger.error(
-        `Groq response did not contain an answer. Model: ${model}`,
-      );
-
-      throw new BadGatewayException(
-        'AI কোনো উত্তর তৈরি করতে পারেনি। আবার চেষ্টা করুন।',
-      );
     }
 
     const structured = this.parseAiResponse(rawAnswer);
@@ -1541,6 +1597,76 @@ Rules:
       resolved,
       quickReplies,
       recommendations,
+      responseSource: usedLocalFallback ? 'LOCAL_FALLBACK' : 'GROQ',
+      supportTicketId,
+      supportPending: Boolean(supportTicketId),
+    };
+  }
+
+  async supportStatus(
+    ticketId: string,
+    guestId: string,
+    customerToken: string,
+  ) {
+    const visitorHash = this.hash(guestId || customerToken || 'anonymous');
+    const ticket = await this.prisma.aiSupportTicket.findFirst({
+      where: { id: ticketId, visitorHash },
+      select: {
+        id: true,
+        status: true,
+        adminReply: true,
+        repliedAt: true,
+        updatedAt: true,
+      },
+    });
+    if (!ticket) throw new NotFoundException('Support request পাওয়া যায়নি।');
+    return ticket;
+  }
+
+  async replySupport(ticketId: string, input: AiSupportReplyDto) {
+    const ticket = await this.prisma.aiSupportTicket.findUnique({
+      where: { id: ticketId },
+    });
+    if (!ticket) throw new NotFoundException('Support request পাওয়া যায়নি।');
+
+    const answer = this.sanitizeForStorage(input.answer);
+    const repliedAt = new Date();
+    const updated = await this.prisma.$transaction(async (transaction) => {
+      const support = await transaction.aiSupportTicket.update({
+        where: { id: ticketId },
+        data: {
+          status: 'REPLIED',
+          adminReply: answer,
+          repliedBy: 'admin',
+          repliedAt,
+        },
+      });
+      await transaction.aiChatLog.create({
+        data: {
+          conversationId: ticket.conversationId,
+          visitorHash: ticket.visitorHash,
+          topic: this.topicFor(ticket.question),
+          intent: 'HUMAN_SUPPORT',
+          question: ticket.question,
+          normalizedQuestion: this.normalizeQuestion(ticket.question),
+          answer,
+          pagePath: ticket.pagePath,
+          needsFollowUp: false,
+          resolved: true,
+          quickReplies: [],
+          recommendedItems: [],
+          model: 'manual-admin',
+          responseTimeMs: Math.max(0, repliedAt.getTime() - ticket.createdAt.getTime()),
+        },
+      });
+      return support;
+    });
+
+    return {
+      id: updated.id,
+      status: updated.status,
+      adminReply: updated.adminReply,
+      repliedAt: updated.repliedAt,
     };
   }
 
@@ -1569,10 +1695,11 @@ Rules:
   }
 
   async conversation(conversationId: string) {
-    const messages = await this.prisma.aiChatLog.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: 'asc' },
-      select: {
+    const [messages, supportTicket] = await Promise.all([
+      this.prisma.aiChatLog.findMany({
+        where: { conversationId },
+        orderBy: { createdAt: 'asc' },
+        select: {
         id: true,
         question: true,
         answer: true,
@@ -1586,14 +1713,28 @@ Rules:
         responseTimeMs: true,
         totalTokens: true,
         createdAt: true,
-      },
-    });
+        },
+      }),
+      this.prisma.aiSupportTicket.findUnique({
+        where: { conversationId },
+        select: {
+          id: true,
+          question: true,
+          failureReason: true,
+          status: true,
+          adminReply: true,
+          repliedAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+    ]);
 
     if (!messages.length) {
       throw new NotFoundException('Conversation পাওয়া যায়নি।');
     }
 
-    return { conversationId, messages };
+    return { conversationId, messages, supportTicket };
   }
 
   async reviewKnowledge(knowledgeId: string, input: AiKnowledgeReviewDto) {
@@ -1633,8 +1774,16 @@ Rules:
 
     const since = new Date(Date.now() - days * 86_400_000);
 
-    const [summary, grouped, visitors, logs, knowledgeStats, knowledgeQueue] =
-      await Promise.all([
+    const [
+      summary,
+      grouped,
+      visitors,
+      logs,
+      knowledgeStats,
+      knowledgeQueue,
+      supportStats,
+      pendingSupport,
+    ] = await Promise.all([
         this.prisma.aiChatLog.aggregate({
           where: {
             createdAt: {
@@ -1734,6 +1883,24 @@ Rules:
             updatedAt: true,
           },
         }),
+        this.prisma.aiSupportTicket.groupBy({
+          by: ['status'],
+          _count: { _all: true },
+        }),
+        this.prisma.aiSupportTicket.findMany({
+          where: { status: 'PENDING' },
+          orderBy: { updatedAt: 'desc' },
+          take: 30,
+          select: {
+            id: true,
+            conversationId: true,
+            question: true,
+            pagePath: true,
+            failureReason: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        }),
       ]);
 
     const questions = summary._count._all;
@@ -1825,6 +1992,15 @@ Rules:
             ._all ?? 0,
       },
       knowledgeQueue,
+      support: {
+        pending:
+          supportStats.find((row) => row.status === 'PENDING')?._count._all ?? 0,
+        replied:
+          supportStats.find((row) => row.status === 'REPLIED')?._count._all ?? 0,
+        closed:
+          supportStats.find((row) => row.status === 'CLOSED')?._count._all ?? 0,
+        queue: pendingSupport,
+      },
 
       tokens: {
         prompt: summary._sum.promptTokens ?? 0,

@@ -75,3 +75,10 @@ export class AiKnowledgeReviewDto {
   @MaxLength(4000)
   answer?: string;
 }
+
+export class AiSupportReplyDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(4000)
+  answer!: string;
+}
