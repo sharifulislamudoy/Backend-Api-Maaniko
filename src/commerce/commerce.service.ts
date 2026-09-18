@@ -286,16 +286,19 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     if (!access) return null;
 
     const now = new Date();
-    await Promise.all([
-      this.prisma.customerAccessToken.update({
-        where: { id: access.id },
-        data: { lastUsedAt: now },
-      }),
-      this.prisma.customerProfile.update({
-        where: { id: access.customerId },
-        data: { lastSeenAt: now },
-      }),
-    ]);
+    const touchIntervalMs = 5 * 60 * 1000;
+    if (now.getTime() - access.lastUsedAt.getTime() >= touchIntervalMs) {
+      await Promise.all([
+        this.prisma.customerAccessToken.update({
+          where: { id: access.id },
+          data: { lastUsedAt: now },
+        }),
+        this.prisma.customerProfile.update({
+          where: { id: access.customerId },
+          data: { lastSeenAt: now },
+        }),
+      ]);
+    }
 
     return access.customer;
   }
@@ -1592,7 +1595,6 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getCart(identityInput: CommerceIdentity): Promise<CartView> {
-    await this.refreshCartLifecycle();
     const { cart } = await this.activeCart(identityInput);
     if (!cart) {
       return {
@@ -2214,10 +2216,12 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
   ): Promise<OrderQuote> {
     const identity = this.validateIdentity(identityInput);
     const items: QuoteLine[] = [];
+    let rewardPointsAvailable = 0;
 
     if (input.mode === 'CART') {
-      const { cart } = await this.activeCart(identity, false);
+      const { cart, customer } = await this.activeCart(identity, false);
       if (!cart) throw new BadRequestException('কার্ট খালি');
+      rewardPointsAvailable = customer?.rewardBalance ?? 0;
 
       const cartItems = await this.prisma.cartItem.findMany({
         where: { cartId: cart.id },
@@ -2225,74 +2229,69 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       });
       if (!cartItems.length) throw new BadRequestException('কার্ট খালি');
 
-      for (const item of cartItems) {
-        if (item.itemType === CartItemType.PRODUCT) {
-          items.push(
-            await this.quoteProduct(
+      const quotedItems = await Promise.all(
+        cartItems.map(async (item): Promise<QuoteLine> => {
+          if (item.itemType === CartItemType.PRODUCT) {
+            return this.quoteProduct(
               item.productId!,
               item.quantity,
               item.variantId ?? undefined,
               item.clientKey,
-            ),
-          );
-        } else if (item.comboId) {
-          items.push(
-            (
+            );
+          }
+          if (item.comboId) {
+            return (
               await this.quoteCombo(
                 item.comboId,
                 this.parseComboConfig(item.customConfig),
                 item.quantity,
                 item.clientKey,
               )
-            ).line,
-          );
-        } else {
-          items.push(
-            (
-              await this.quoteCustomCombo(
-                this.parseComboConfig(item.customConfig) ?? [],
-                item.quantity,
-                item.clientKey,
-              )
-            ).line,
-          );
-        }
-      }
+            ).line;
+          }
+          return (
+            await this.quoteCustomCombo(
+              this.parseComboConfig(item.customConfig) ?? [],
+              item.quantity,
+              item.clientKey,
+            )
+          ).line;
+        }),
+      );
+      items.push(...quotedItems);
     } else if (input.mode === 'BUY_NOW') {
       if (!input.item)
         throw new BadRequestException('Buy now item পাওয়া যায়নি');
 
+      let quotePromise: Promise<QuoteLine>;
       if (input.item.itemType === CartItemType.PRODUCT) {
-        items.push(
-          await this.quoteProduct(
-            this.requiredText(input.item.productId, 'productId', 180),
-            Number(input.item.quantity),
-            this.cleanText(input.item.variantId, 180),
-            'buy-now',
-          ),
+        quotePromise = this.quoteProduct(
+          this.requiredText(input.item.productId, 'productId', 180),
+          Number(input.item.quantity),
+          this.cleanText(input.item.variantId, 180),
+          'buy-now',
         );
       } else if (input.item.comboId) {
-        items.push(
-          (
-            await this.quoteCombo(
-              input.item.comboId,
-              input.item.customConfig,
-              Number(input.item.quantity),
-              'buy-now',
-            )
-          ).line,
-        );
+        quotePromise = this.quoteCombo(
+          input.item.comboId,
+          input.item.customConfig,
+          Number(input.item.quantity),
+          'buy-now',
+        ).then((result) => result.line);
       } else {
-        items.push(
-          (
-            await this.quoteCustomCombo(
-              input.item.customConfig ?? [],
-              Number(input.item.quantity),
-              'buy-now',
-            )
-          ).line,
-        );
+        quotePromise = this.quoteCustomCombo(
+          input.item.customConfig ?? [],
+          Number(input.item.quantity),
+          'buy-now',
+        ).then((result) => result.line);
       }
+
+      const [quotedItem, customer] = await Promise.all([
+        quotePromise,
+        this.customerForIdentity(identity),
+      ]);
+      items.push(quotedItem);
+      rewardPointsAvailable = customer?.rewardBalance ?? 0;
     } else {
       throw new BadRequestException('Checkout mode সঠিক নয়');
     }
@@ -2301,8 +2300,6 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       items.reduce((sum, item) => sum + item.lineTotal, 0),
     );
     const deliveryCharge = this.money(this.deliveryCharge(subtotal));
-    const customer = await this.customerForIdentity(identity);
-    const rewardPointsAvailable = customer?.rewardBalance ?? 0;
     const requestedPoints = Math.max(
       0,
       Math.floor(Number(input.rewardPointsToUse ?? 0)),
@@ -2850,33 +2847,31 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       throw new UnauthorizedException('Customer access পাওয়া যায়নি');
     }
 
-    await this.mergeGuestAssets(identity.guestId, customer.id);
-
-    const orders = await this.prisma.order.findMany({
-      where: { customerId: customer.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        items: true,
-        history: { orderBy: { createdAt: 'asc' } },
-      },
-    });
-
-    const events = await this.prisma.customerEvent.findMany({
-      where: { customerId: customer.id },
-      orderBy: { createdAt: 'desc' },
-      take: 30,
-      select: {
-        id: true,
-        type: true,
-        path: true,
-        entityType: true,
-        entityId: true,
-        metadata: true,
-        createdAt: true,
-      },
-    });
-
-    const [cart, wishlist] = await Promise.all([
+    // Token creation/restore already merges guest assets. Account reads stay
+    // read-focused and independent queries run together to avoid waterfalls.
+    const [orders, events, cart, wishlist] = await Promise.all([
+      this.prisma.order.findMany({
+        where: { customerId: customer.id },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          items: true,
+          history: { orderBy: { createdAt: 'asc' } },
+        },
+      }),
+      this.prisma.customerEvent.findMany({
+        where: { customerId: customer.id },
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+        select: {
+          id: true,
+          type: true,
+          path: true,
+          entityType: true,
+          entityId: true,
+          metadata: true,
+          createdAt: true,
+        },
+      }),
       this.getCart(identity),
       this.getWishlist(identity),
     ]);
