@@ -266,6 +266,7 @@ model Product {
   cartItems          CartItem[]          @relation("CartProduct")
   wishlistItems      WishlistItem[]      @relation("WishlistProduct")
   orderItems         OrderItem[]         @relation("OrderProduct")
+  orderReviews       OrderReview[]       @relation("ReviewProduct")
   leads              CustomerLead[]      @relation("LeadProduct")
   inventoryMovements InventoryMovement[]
 
@@ -403,6 +404,7 @@ model Combo {
   cartItems     CartItem[]     @relation("CartCombo")
   wishlistItems WishlistItem[] @relation("WishlistCombo")
   orderItems    OrderItem[]    @relation("OrderCombo")
+  orderReviews  OrderReview[]  @relation("ReviewCombo")
   leads         CustomerLead[] @relation("LeadCombo")
 
   createdAt DateTime @default(now())
@@ -557,17 +559,18 @@ model CustomerProfile {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  accessTokens CustomerAccessToken[]
-  devices      DeviceIdentity[]
-  sessions     TrackingSession[]
-  events       CustomerEvent[]
-  carts        Cart[]
-  wishlist     Wishlist?
-  orders       Order[]
-  leads        CustomerLead[]
-  consents     ConsentLog[]
-  pushDevices  PushDevice[]
+  accessTokens      CustomerAccessToken[]
+  devices           DeviceIdentity[]
+  sessions          TrackingSession[]
+  events            CustomerEvent[]
+  carts             Cart[]
+  wishlist          Wishlist?
+  orders            Order[]
+  leads             CustomerLead[]
+  consents          ConsentLog[]
+  pushDevices       PushDevice[]
   pushNotifications PushInboxItem[]
+  orderReviews      OrderReview[]
 
   @@unique([normalizedName, normalizedPhone])
   @@index([normalizedPhone])
@@ -618,16 +621,16 @@ model PushDevice {
 }
 
 model PushCampaign {
-  id           String               @id @default(cuid())
-  type         PushNotificationType @default(OFFER)
-  title        String
-  body         String               @db.Text
-  imageUrl     String?
-  link         String?
-  recipientCount Int                @default(0)
-  sentCount    Int                  @default(0)
-  failureCount Int                  @default(0)
-  createdAt    DateTime             @default(now())
+  id             String               @id @default(cuid())
+  type           PushNotificationType @default(OFFER)
+  title          String
+  body           String               @db.Text
+  imageUrl       String?
+  link           String?
+  recipientCount Int                  @default(0)
+  sentCount      Int                  @default(0)
+  failureCount   Int                  @default(0)
+  createdAt      DateTime             @default(now())
 
   @@index([type, createdAt])
   @@index([createdAt])
@@ -776,53 +779,57 @@ model WishlistItem {
 }
 
 model Order {
-  id                      String          @id @default(cuid())
-  orderNumber             String          @unique
-  customerId              String
-  customer                CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  cartId                  String?         @unique
-  cart                    Cart?           @relation(fields: [cartId], references: [id], onDelete: SetNull)
-  status                  OrderStatus     @default(PENDING)
-  paymentMethod           PaymentMethod   @default(CASH_ON_DELIVERY)
-  customerName            String
-  phone                   String
-  alternativePhone        String?
-  email                   String?
-  address                 String
-  area                    String?
-  city                    String?
-  note                    String?
-  deliveryType            Int             @default(0)
-  steadfastConsignmentId  String?         @unique
-  steadfastTrackingCode   String?         @unique
-  steadfastStatus         String?
-  steadfastSubmittedAt    DateTime?
-  steadfastLastSyncedAt   DateTime?
-  steadfastError          String?
-  publicTrackingToken     String?         @unique
-  publicTrackingExpiresAt DateTime?
-  subtotal                Decimal         @db.Decimal(12, 2)
-  deliveryCharge          Decimal         @db.Decimal(12, 2)
-  total                   Decimal         @db.Decimal(12, 2)
-  revenue                 Decimal         @default(0) @db.Decimal(12, 2)
-  productCost             Decimal         @default(0) @db.Decimal(12, 2)
-  packagingCost           Decimal         @default(0) @db.Decimal(12, 2)
-  courierCost             Decimal         @default(0) @db.Decimal(12, 2)
-  gatewayFee              Decimal         @default(0) @db.Decimal(12, 2)
-  otherCost               Decimal         @default(0) @db.Decimal(12, 2)
-  totalCost               Decimal         @default(0) @db.Decimal(12, 2)
-  grossProfit             Decimal         @default(0) @db.Decimal(12, 2)
-  netProfit               Decimal         @default(0) @db.Decimal(12, 2)
-  profitMargin            Decimal         @default(0) @db.Decimal(7, 2)
-  financialRecognized     Boolean         @default(false)
-  deliveredAt             DateTime?
-  returnedAt              DateTime?
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @updatedAt
+  id                       String          @id @default(cuid())
+  orderNumber              String          @unique
+  customerId               String
+  customer                 CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  cartId                   String?         @unique
+  cart                     Cart?           @relation(fields: [cartId], references: [id], onDelete: SetNull)
+  status                   OrderStatus     @default(PENDING)
+  paymentMethod            PaymentMethod   @default(CASH_ON_DELIVERY)
+  customerName             String
+  phone                    String
+  alternativePhone         String?
+  email                    String?
+  address                  String
+  area                     String?
+  city                     String?
+  note                     String?
+  deliveryType             Int             @default(0)
+  steadfastConsignmentId   String?         @unique
+  steadfastTrackingCode    String?         @unique
+  steadfastStatus          String?
+  steadfastSubmittedAt     DateTime?
+  steadfastLastSyncedAt    DateTime?
+  steadfastError           String?
+  publicTrackingToken      String?         @unique
+  publicTrackingExpiresAt  DateTime?
+  subtotal                 Decimal         @db.Decimal(12, 2)
+  deliveryCharge           Decimal         @db.Decimal(12, 2)
+  total                    Decimal         @db.Decimal(12, 2)
+  revenue                  Decimal         @default(0) @db.Decimal(12, 2)
+  productCost              Decimal         @default(0) @db.Decimal(12, 2)
+  packagingCost            Decimal         @default(0) @db.Decimal(12, 2)
+  courierCost              Decimal         @default(0) @db.Decimal(12, 2)
+  gatewayFee               Decimal         @default(0) @db.Decimal(12, 2)
+  otherCost                Decimal         @default(0) @db.Decimal(12, 2)
+  totalCost                Decimal         @default(0) @db.Decimal(12, 2)
+  grossProfit              Decimal         @default(0) @db.Decimal(12, 2)
+  netProfit                Decimal         @default(0) @db.Decimal(12, 2)
+  profitMargin             Decimal         @default(0) @db.Decimal(7, 2)
+  financialRecognized      Boolean         @default(false)
+  deliveredAt              DateTime?
+  returnedAt               DateTime?
+  reviewPromptDismissCount Int             @default(0)
+  reviewPromptNextAt       DateTime?
+  reviewPromptOptOut       Boolean         @default(false)
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt
 
   items          OrderItem[]
   history        OrderStatusHistory[]
   financeEntries FinanceEntry[]
+  review         OrderReview?
 
   @@index([customerId, createdAt])
   @@index([status, createdAt])
@@ -873,9 +880,35 @@ model OrderItem {
   customConfig          Json?
   createdAt             DateTime        @default(now())
 
+  selectedReview OrderReview? @relation("SelectedReviewItem")
+
   @@index([orderId])
   @@index([productId])
   @@index([comboId])
+}
+
+model OrderReview {
+  id                  String          @id @default(cuid())
+  orderId             String          @unique
+  order               Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId          String
+  customer            CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  overallRating       Int
+  comment             String?         @db.Text
+  selectedOrderItemId String?         @unique
+  selectedOrderItem   OrderItem?      @relation("SelectedReviewItem", fields: [selectedOrderItemId], references: [id], onDelete: SetNull)
+  targetProductId     String?
+  targetProduct       Product?        @relation("ReviewProduct", fields: [targetProductId], references: [id], onDelete: SetNull)
+  targetComboId       String?
+  targetCombo         Combo?          @relation("ReviewCombo", fields: [targetComboId], references: [id], onDelete: SetNull)
+  isVerified          Boolean         @default(true)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([customerId, createdAt])
+  @@index([targetProductId, createdAt])
+  @@index([targetComboId, createdAt])
+  @@index([overallRating])
 }
 
 model Supplier {

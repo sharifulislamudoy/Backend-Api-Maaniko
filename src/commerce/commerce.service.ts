@@ -366,7 +366,14 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async mergeGuestAssets(guestId: string, customerId: string) {
-    await this.touchDevice(guestId, customerId);
+    const now = new Date();
+    await Promise.all([
+      this.touchDevice(guestId, customerId),
+      this.prisma.pushDevice.updateMany({
+        where: { guestId },
+        data: { customerId, lastSeenAt: now },
+      }),
+    ]);
 
     const [guestCart, customerCart] = await Promise.all([
       this.prisma.cart.findFirst({

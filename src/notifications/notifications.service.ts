@@ -22,6 +22,12 @@ const INVALID_TOKEN_CODES = new Set([
   'messaging/registration-token-not-registered',
 ]);
 
+const CUSTOMER_ORDER_PUSH_STATUSES = new Set<OrderStatus>([
+  OrderStatus.CONFIRMED,
+  OrderStatus.SHIPPED,
+  OrderStatus.DELIVERED,
+]);
+
 const STATUS_COPY: Record<OrderStatus, { title: string; body: string }> = {
   PENDING: {
     title: 'অর্ডারটি গ্রহণ করা হয়েছে',
@@ -320,6 +326,15 @@ export class NotificationsService {
   }
 
   async sendOrderStatus(input: OrderStatusPushInput) {
+    if (!CUSTOMER_ORDER_PUSH_STATUSES.has(input.status)) {
+      return {
+        recipientCount: 0,
+        sentCount: 0,
+        failureCount: 0,
+        skipped: true,
+      };
+    }
+
     try {
       const copy = STATUS_COPY[input.status];
       const link = input.trackingToken
