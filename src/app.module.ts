@@ -23,6 +23,7 @@ import { FinanceModule } from './finance/finance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { EngagementModule } from './engagement/engagement.module';
+import { FacebookMessengerModule } from './facebook-messenger/facebook-messenger.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { EngagementModule } from './engagement/engagement.module';
     NotificationsModule,
     ReviewsModule,
     EngagementModule,
+    FacebookMessengerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

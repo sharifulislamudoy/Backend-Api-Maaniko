@@ -7,5 +7,6 @@ import { AiAssistantService } from './ai-assistant.service';
   imports: [TelegramModule],
   controllers: [AiAssistantController],
   providers: [AiAssistantService],
+  exports: [AiAssistantService],
 })
 export class AiAssistantModule {}

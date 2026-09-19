@@ -4,7 +4,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Meta signs the exact request bytes. Nest must retain them so the
+  // Messenger webhook can verify X-Hub-Signature-256 before trusting events.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get(ConfigService);
 
   app.useGlobalPipes(
