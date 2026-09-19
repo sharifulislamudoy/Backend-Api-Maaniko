@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ProductBulletKind } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EngagementService } from '../../engagement/engagement.service';
 import type { ProductInput } from '../catalog.types';
 import {
   requiredText,
@@ -34,7 +35,10 @@ const productInclude = {
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly engagement: EngagementService,
+  ) {}
 
   async categoryOptions() {
     const categories = await this.prisma.category.findMany({
@@ -383,7 +387,7 @@ export class ProductsService {
 
   async create(input: ProductInput) {
     const { category, journeys } = await this.relationalData(input);
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       const product = await tx.product.create({
         data: {
           ...(input.id ? { id: input.id } : {}),
@@ -414,6 +418,7 @@ export class ProductsService {
       });
       return this.serialize(created, true);
     });
+    return updated;
   }
 
   async update(id: string, input: ProductInput) {
@@ -428,7 +433,7 @@ export class ProductsService {
       );
     }
     const { category, journeys } = await this.relationalData(input);
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       await tx.productVariantValue.deleteMany({
         where: { variant: { productId: id } },
       });
@@ -467,6 +472,8 @@ export class ProductsService {
       });
       return this.serialize(product, true);
     });
+    await this.engagement.processProductAlertsFor(id);
+    return updated;
   }
 
   async remove(id: string) {

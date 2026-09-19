@@ -93,8 +93,21 @@ export type LeadInput = {
   email?: string;
   marketingConsent?: boolean;
   productId?: string;
+  variantId?: string;
   comboId?: string;
   data?: Record<string, unknown>;
+};
+
+export type CheckoutAvailabilityItem = {
+  clientKey: string;
+  itemType: CartItemType;
+  productId?: string;
+  variantId?: string;
+  comboId?: string;
+  name: string;
+  image?: string;
+  requestedQuantity: number;
+  message: string;
 };
 
 export type CareProfileInput = {

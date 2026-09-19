@@ -11,12 +11,16 @@ import {
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EngagementService } from '../engagement/engagement.service';
 import type { QuoteLine } from '../commerce/commerce.types';
 import type { InventoryAdjustmentInput } from './inventory.types';
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly engagement: EngagementService,
+  ) {}
 
   private number(value: Prisma.Decimal | number | string | null | undefined) {
     return Number(value ?? 0);
@@ -481,7 +485,7 @@ export class InventoryService {
     if (isVariant && !input.variantId)
       throw new BadRequestException('variantId প্রয়োজন');
 
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       const supplierName = this.clean(input.supplierName, 160);
       const supplier = supplierName
         ? await tx.supplier.upsert({
@@ -576,6 +580,8 @@ export class InventoryService {
       });
       return updated;
     });
+    await this.engagement.processProductAlertsFor(input.productId);
+    return updated;
   }
 
   async productHistory(productId: string) {

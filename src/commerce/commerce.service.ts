@@ -29,6 +29,7 @@ import type {
   AdminOrderStatusInput,
   CareProfileInput,
   CartItemInput,
+  CheckoutAvailabilityItem,
   CheckoutDraftInput,
   ComboConfigItemInput,
   CommerceIdentity,
@@ -111,6 +112,10 @@ type CartView = {
   lastActivityAt: Date | null;
   items: CartViewItem[];
 };
+
+type CreatedOrderWithDetails = Prisma.OrderGetPayload<{
+  include: { items: true; history: true };
+}>;
 
 @Injectable()
 export class CommerceService implements OnModuleInit, OnModuleDestroy {
@@ -2021,15 +2026,24 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    const [product, combo] = await Promise.all([
+    const [product, combo, variant] = await Promise.all([
       input.productId
         ? this.prisma.product.findUnique({ where: { id: input.productId } })
         : null,
       input.comboId
         ? this.prisma.combo.findUnique({ where: { id: input.comboId } })
         : null,
+      input.variantId
+        ? this.prisma.productVariant.findUnique({
+            where: { id: input.variantId },
+            include: { product: true },
+          })
+        : null,
     ]);
-    const entity = product ?? combo;
+    if (input.variantId && (!variant || variant.productId !== input.productId)) {
+      throw new NotFoundException('Product variant পাওয়া যায়নি');
+    }
+    const entity = variant ?? product ?? combo;
     if ((input.productId || input.comboId) && !entity) {
       throw new NotFoundException('Product পাওয়া যায়নি');
     }
@@ -2044,6 +2058,7 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           customerId: customer.id,
           type: input.type,
           productId: input.productId ?? null,
+          variantId: input.variantId ?? null,
           comboId: input.comboId ?? null,
           isActive: true,
         },
@@ -2057,8 +2072,10 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         guestId: identity.guestId,
         customerId: customer?.id,
         productId: this.cleanText(input.productId, 180),
+        variantId: this.cleanText(input.variantId, 180),
         comboId: this.cleanText(input.comboId, 180),
-        baselinePrice: entity?.price,
+        baselinePrice:
+          variant?.price ?? product?.price ?? combo?.price ?? undefined,
         baselineStock: entity
           ? Math.max(0, entity.stock - entity.reservedStock)
           : null,
@@ -2210,6 +2227,32 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
     return subtotal >= freeMinimum ? 0 : charge;
   }
 
+  private exceptionMessage(error: unknown) {
+    if (error instanceof ConflictException) {
+      const response = error.getResponse();
+      if (typeof response === 'string') return response;
+      if (
+        response &&
+        typeof response === 'object' &&
+        typeof (response as { message?: unknown }).message === 'string'
+      ) {
+        return (response as { message: string }).message;
+      }
+    }
+    return 'পণ্যটি বর্তমানে পর্যাপ্ত স্টকে নেই';
+  }
+
+  private stockChanged(items: CheckoutAvailabilityItem[]) {
+    return new ConflictException({
+      statusCode: 409,
+      error: 'Conflict',
+      code: 'CHECKOUT_STOCK_CHANGED',
+      message:
+        'কার্টের এক বা একাধিক পণ্যের স্টক পরিবর্তন হয়েছে। পণ্য বাদ দিয়ে checkout করুন অথবা stock reminder সেট করুন।',
+      unavailableItems: items,
+    });
+  }
+
   async quoteOrder(
     identityInput: CommerceIdentity,
     input: OrderQuoteInput,
@@ -2226,10 +2269,19 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
       const cartItems = await this.prisma.cartItem.findMany({
         where: { cartId: cart.id },
         orderBy: { createdAt: 'asc' },
+        include: {
+          product: {
+            include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
+          },
+          variant: true,
+          combo: {
+            include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
+          },
+        },
       });
       if (!cartItems.length) throw new BadRequestException('কার্ট খালি');
 
-      const quotedItems = await Promise.all(
+      const results = await Promise.allSettled(
         cartItems.map(async (item): Promise<QuoteLine> => {
           if (item.itemType === CartItemType.PRODUCT) {
             return this.quoteProduct(
@@ -2258,7 +2310,35 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
           ).line;
         }),
       );
-      items.push(...quotedItems);
+      const unavailable: CheckoutAvailabilityItem[] = [];
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          items.push(result.value);
+          return;
+        }
+        if (!(result.reason instanceof ConflictException)) throw result.reason;
+        const item = cartItems[index];
+        unavailable.push({
+          clientKey: item.clientKey,
+          itemType: item.itemType,
+          productId: item.productId ?? undefined,
+          variantId: item.variantId ?? undefined,
+          comboId: item.comboId ?? undefined,
+          name:
+            item.variant && item.product
+              ? `${item.product.name} — ${item.variant.sku}`
+              : item.product?.name ??
+                item.combo?.name ??
+                'Custom Solution Box',
+          image:
+            item.variant?.imageUrl ??
+            item.product?.images[0]?.url ??
+            item.combo?.images[0]?.url,
+          requestedQuantity: item.quantity,
+          message: this.exceptionMessage(result.reason),
+        });
+      });
+      if (unavailable.length) throw this.stockChanged(unavailable);
     } else if (input.mode === 'BUY_NOW') {
       if (!input.item)
         throw new BadRequestException('Buy now item পাওয়া যায়নি');
@@ -2286,10 +2366,25 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         ).then((result) => result.line);
       }
 
-      const [quotedItem, customer] = await Promise.all([
-        quotePromise,
-        this.customerForIdentity(identity),
-      ]);
+      let quotedItem: QuoteLine;
+      try {
+        quotedItem = await quotePromise;
+      } catch (error) {
+        if (!(error instanceof ConflictException)) throw error;
+        throw this.stockChanged([
+          {
+            clientKey: 'buy-now',
+            itemType: input.item.itemType,
+            productId: input.item.productId,
+            variantId: input.item.variantId,
+            comboId: input.item.comboId,
+            name: 'নির্বাচিত পণ্য',
+            requestedQuantity: Number(input.item.quantity),
+            message: this.exceptionMessage(error),
+          },
+        ]);
+      }
+      const customer = await this.customerForIdentity(identity);
       items.push(quotedItem);
       rewardPointsAvailable = customer?.rewardBalance ?? 0;
     } else {
@@ -2522,8 +2617,10 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         ? await this.activeCart(nextIdentity, false)
         : { cart: null };
 
-    const order = await this.prisma.$transaction(async (tx) => {
-      await this.inventory.reserveQuote(tx, quote.items);
+    let order: CreatedOrderWithDetails;
+    try {
+      order = await this.prisma.$transaction(async (tx) => {
+        await this.inventory.reserveQuote(tx, quote.items);
 
       const created = await tx.order.create({
         data: {
@@ -2615,8 +2712,23 @@ export class CommerceService implements OnModuleInit, OnModuleDestroy {
         });
       }
 
-      return created;
-    });
+        return created;
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2034'
+      ) {
+        throw new ConflictException({
+          statusCode: 409,
+          error: 'Conflict',
+          code: 'CHECKOUT_RETRY_REQUIRED',
+          message:
+            'একই সময়ে stock পরিবর্তন হয়েছে। বর্তমান stock যাচাই করে আবার চেষ্টা করুন।',
+        });
+      }
+      throw error;
+    }
 
     await this.track(nextIdentity, {
       type: CustomerEventType.ORDER_CREATED,

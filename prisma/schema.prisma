@@ -428,6 +428,7 @@ model ProductVariant {
   cartItems          CartItem[]          @relation("CartVariant")
   orderItems         OrderItem[]         @relation("OrderVariant")
   inventoryMovements InventoryMovement[]
+  leads              CustomerLead[]      @relation("LeadVariant")
 
   @@index([productId])
 }
@@ -1071,6 +1072,8 @@ model CustomerLead {
   customer      CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   productId     String?
   product       Product?         @relation("LeadProduct", fields: [productId], references: [id], onDelete: SetNull)
+  variantId     String?
+  variant       ProductVariant?  @relation("LeadVariant", fields: [variantId], references: [id], onDelete: SetNull)
   comboId       String?
   combo         Combo?           @relation("LeadCombo", fields: [comboId], references: [id], onDelete: SetNull)
   data          Json?
@@ -1084,6 +1087,7 @@ model CustomerLead {
   @@index([type, createdAt])
   @@index([customerId])
   @@index([guestId])
+  @@index([variantId])
 }
 
 model RewardTransaction {

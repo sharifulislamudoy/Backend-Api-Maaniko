@@ -586,21 +586,24 @@ export class EngagementService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private async processProductAlerts() {
+  private async processProductAlerts(productId?: string) {
     const leads = await this.prisma.customerLead.findMany({
       where: {
         isActive: true,
         customerId: { not: null },
         type: { in: [LeadType.PRICE_DROP, LeadType.BACK_IN_STOCK] },
+        ...(productId ? { productId } : {}),
       },
-      include: { product: true, combo: true },
+      include: { product: true, variant: true, combo: true },
       take: 500,
     });
     for (const lead of leads) {
       if (!lead.customerId) continue;
-      const entity = lead.product ?? lead.combo;
+      const entity = lead.variant ?? lead.product ?? lead.combo;
       if (!entity) continue;
-      const price = Number(entity.price);
+      const price = Number(
+        lead.variant?.price ?? lead.product?.price ?? lead.combo?.price ?? 0,
+      );
       const available = entity.stock - entity.reservedStock > 0;
       const shouldNotify =
         (lead.type === LeadType.PRICE_DROP &&
@@ -608,17 +611,18 @@ export class EngagementService implements OnModuleInit, OnModuleDestroy {
           price < Number(lead.baselinePrice)) ||
         (lead.type === LeadType.BACK_IN_STOCK && available);
       if (!shouldNotify) continue;
-      const isProduct = Boolean(lead.product);
+      const isProduct = Boolean(lead.product || lead.variant);
       const link = isProduct
         ? `/products/${lead.product!.slug}`
         : `/solution-box/${lead.combo!.slug}`;
+      const entityName = lead.product?.name ?? lead.combo?.name ?? 'পণ্য';
       await this.notifications.sendCustomerMessage({
         customerId: lead.customerId,
         title:
           lead.type === LeadType.PRICE_DROP
             ? 'আপনার পছন্দের পণ্যের দাম কমেছে'
             : 'আপনার পছন্দের পণ্য আবার স্টকে এসেছে',
-        body: `${entity.name}${lead.type === LeadType.PRICE_DROP ? ` এখন ৳${Math.round(price)}` : ' এখন অর্ডার করা যাবে'}.`,
+        body: `${entityName}${lead.type === LeadType.PRICE_DROP ? ` এখন ৳${Math.round(price)}` : ' এখন অর্ডার করা যাবে'}.`,
         link,
         tag: `lead-${lead.id}`,
       });
@@ -627,6 +631,11 @@ export class EngagementService implements OnModuleInit, OnModuleDestroy {
         data: { isActive: false, notifiedAt: new Date() },
       });
     }
+  }
+
+  async processProductAlertsFor(productId: string) {
+    await this.processProductAlerts(productId);
+    return { processed: true };
   }
 
   private async processReorders() {
@@ -676,7 +685,14 @@ export class EngagementService implements OnModuleInit, OnModuleDestroy {
 
   async adminOverview() {
     await this.processLifecycle();
-    const [rewardTotals, referrals, reminders, leads, recentTransactions] =
+    const [
+      rewardTotals,
+      referrals,
+      reminders,
+      leads,
+      recentTransactions,
+      recentAlerts,
+    ] =
       await Promise.all([
         this.prisma.rewardTransaction.aggregate({
           _sum: { points: true },
@@ -699,8 +715,26 @@ export class EngagementService implements OnModuleInit, OnModuleDestroy {
             order: { select: { orderNumber: true } },
           },
         }),
+        this.prisma.customerLead.findMany({
+          where: { type: { in: [LeadType.PRICE_DROP, LeadType.BACK_IN_STOCK] } },
+          orderBy: { createdAt: 'desc' },
+          take: 100,
+          include: {
+            customer: { select: { id: true, name: true, phone: true } },
+            product: { select: { id: true, name: true, sku: true } },
+            variant: { select: { id: true, sku: true } },
+            combo: { select: { id: true, name: true, sku: true } },
+          },
+        }),
       ]);
-    return { rewardTotals, referrals, reminders, leads, recentTransactions };
+    return {
+      rewardTotals,
+      referrals,
+      reminders,
+      leads,
+      recentTransactions,
+      recentAlerts,
+    };
   }
 
   async adjustPoints(input: RewardAdjustmentInput) {
